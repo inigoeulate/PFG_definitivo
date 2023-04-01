@@ -176,13 +176,17 @@ final<-i
 
   # Graficación de ambas medias móviles
 
-png(paste(wd,"/plots/ocupantes_conteo_robus3_primer_dia.png",sep=""), width=800, height=800)
-plot(subset$marca_tiempo[comienzo:final], subset$ocupantes_conteo_robus3[comienzo:final],
+png(paste(wd,"/plots/ocupantes_conteo_robus3_primer_dia.png",sep=""), 
+    width=800, height=800)
+plot(subset$marca_tiempo[comienzo:final],
+     subset$ocupantes_conteo_robus3[comienzo:final],
      xlab="hora", ylab="número de ocupantes")
 dev.off()
 
-png(paste(wd,"/plots/ocupantes_conteo_robus5_primer_dia.png",sep=""), width=800, height=800)
-plot(subset$marca_tiempo[comienzo:final], subset$ocupantes_conteo_robus5[comienzo:final],
+png(paste(wd,"/plots/ocupantes_conteo_robus5_primer_dia.png",sep=""),
+    width=800, height=800)
+plot(subset$marca_tiempo[comienzo:final],
+     subset$ocupantes_conteo_robus5[comienzo:final],
      xlab="hora", ylab="número de ocupantes")
 dev.off()
 
@@ -234,7 +238,7 @@ rm(i,j,exit,comienzo,final,subset,marca_tiempo,
   # n es el día del año.
   # Las unidades de B son grados angulares.
 
-# Los husos horarios están centrados en meridianos de longitudes múltiplos de 15°.
+# Los husos horarios están centrados en meridianos de longitudes múltiplos de 15°
 # El huso horario conocido como UTC+0 (Coordinated Universal Time) está centrado
 # en el meridiano de Greenwich, cuya longitud es 0.
 # El uso horario GMT+1 está centrado en el meridiano de longitud 15°,
@@ -463,7 +467,7 @@ acimut_aparente<-dataset$acimut-acimut_plano
 radiacion_directa_fachada<-radiacion_directa_perpendicular*cos(dataset$altura*pi/180)*cos(acimut_aparente*pi/180)
 
 # Verificación:
-  # si el sol ve la fachada (azimuth aparente entre -90º y 90º) -> radiación directa
+  # si el sol ve la fachada (azimuth aparente = [-90º,90º]) -> radiación directa
   # sino, radiación directa = 0
 
 for (i in 1:nrow(dataset)){
@@ -639,5 +643,45 @@ rm(acimut,acimut_aparente,acimut_plano,altura,cenit,
 #===============================================================================
 
 #===============================================================================
-# Siguiente pasooo
+# Resampleo del dataset para tener datos cada 15, 30 y 60 minutos
 #-------------------------------------------------------------------------------
+
+sampleo<-c(15,30,60)
+
+variables<-c("ocupantes_conteo_robus3",
+             "temperatura_exterior",
+             "tempreatura_interior",
+             "energia_agua_refrigerada",
+             "radiacion_directa_fachada",
+             "radiacion_global_fachada")
+
+lista<-list(NULL, variables)
+
+n_elementos<-sampleo/5
+
+for(i in 1:length(sampleo)){
+  assign(paste("dataframe_",sampleo[i],sep=""),
+         data.frame(matrix(rnorm(length(variables),nrow(dataset)),
+                           nrow=nrow(dataset),ncol=length(variables),
+                           dimnames=lista)))
+}
+
+#for(i in 1:length(variables)){
+#  for(j in 1:length(dataset)){
+#   if (names(dataset[j])==variables[i]){
+#   }
+# }
+#}
+ocupantes_conteo_robus3<-rollmean(dataset$ocupantes_conteo,k=n_elementos,fill=NA,align="center")
+temperatura_exterior<-rollmean(dataset$temperatura_exterior,k=n_elementos,fill=NA,align="center")
+temperatura_interior<-rollmean(dataset$temperatura_interior,k=n_elementos,fill=NA,align="center")
+energia_agua_refrigerada<-rollmean(dataset$energia_agua_refrigerada,k=n_elementos,fill=NA,align="center")
+radiacion_directa_fachada<-rollmean(dataset$radiacion_directa_fachada,k=n_elementos,fill=NA,align="center")
+radiacion_global_fachada<-rollmean(dataset$radiacion_global_fachada,k=n_elementos,fill=NA,align="center")
+assign(paste("dataset_",sampleo[i],sep=""),
+       data.frame(ocupantes_conteo_robus3,
+                  temperatura_exterior,
+                  temperatura_interior,
+                  energia_agua_refrigerada,
+                  radiacion_directa_fachada,
+                  radiacion_global_fachada))
