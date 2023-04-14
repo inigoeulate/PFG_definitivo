@@ -646,18 +646,40 @@ rm(acimut,acimut_aparente,acimut_plano,altura,cenit,
 # Resampleo del dataset para tener datos cada 15, 30 y 60 minutos
 #-------------------------------------------------------------------------------
 
-sampleo<-c(15,30,60)
+# Creación de un dataframe que contenga únicamente las variables que se van a
+# emplear para las regresiones
 
-variables<-c("ocupantes_conteo_robus3",
+variables<-c("hora_solar",
+             "ocupantes_conteo_robus3",
              "temperatura_exterior",
-             "tempreatura_interior",
+             "temperatura_interior",
              "energia_agua_refrigerada",
              "radiacion_directa_fachada",
              "radiacion_global_fachada")
 
+dataframe<-data.frame(matrix(ncol=length(variables),nrow=nrow(dataset)))
+names(dataframe)<-variables
+
+for(i in 1:length(dataframe)){
+  for(j in 1:length(dataset)){
+   if (names(dataset[j])==names(dataframe[i])){
+     dataframe[,i]<-dataset[,j]
+   }
+ }
+}
+
+#-------------------------------------------------------------------------------
+
+
+sampleo<-c(15,30,60)
+
 lista<-list(NULL, variables)
 
 n_elementos<-sampleo/5
+
+
+
+
 
 for(i in 1:length(sampleo)){
   assign(paste("dataframe_",sampleo[i],sep=""),
@@ -666,12 +688,6 @@ for(i in 1:length(sampleo)){
                            dimnames=lista)))
 }
 
-#for(i in 1:length(variables)){
-#  for(j in 1:length(dataset)){
-#   if (names(dataset[j])==variables[i]){
-#   }
-# }
-#}
 ocupantes_conteo_robus3<-rollmean(dataset$ocupantes_conteo,k=n_elementos,fill=NA,align="center")
 temperatura_exterior<-rollmean(dataset$temperatura_exterior,k=n_elementos,fill=NA,align="center")
 temperatura_interior<-rollmean(dataset$temperatura_interior,k=n_elementos,fill=NA,align="center")
