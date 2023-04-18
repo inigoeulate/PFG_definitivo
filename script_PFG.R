@@ -44,41 +44,43 @@ dataset<-na.omit(dataset)
 # Cambio en los nombres de las variables para que tengan nombres más
 # autoexplicativos y fáciles de emplear.
 
-names(dataset)[1]<-"marca_tiempo"
-names(dataset)[2]<-"voc"
-names(dataset)[3]<-"presion sonora"
-names(dataset)[4]<-"humedad_relativa_interior"
-names(dataset)[5]<-"temperatura_interior"
-names(dataset)[6]<-"iluminancia_interior"
-names(dataset)[7]<-"pm2.5"
-names(dataset)[8]<-"co2_interior"
-names(dataset)[9]<-"dispositivos_contectados_wifi"
-names(dataset)[10]<-"energia_ventilador_techo"
-names(dataset)[11]<-"energia_iluminacion"
-names(dataset)[12]<-"energia_enchufes"
-names(dataset)[13]<-"energia_agua_refrigerada"
-names(dataset)[14]<-"energia_ventilador_ahu"
-names(dataset)[15]<-"suministro_aire"
-names(dataset)[16]<-"posicion_damper"
-names(dataset)[17]<-"setpoint_temperatura"
-names(dataset)[18]<-"posicion_valvula_bobina_enfriamiento"
-names(dataset)[19]<-"comando_valvula_bobina_enfriamiento"
-names(dataset)[20]<-"velocidad_ventilador_ahu"
-names(dataset)[21]<-"temperatura_ambiental_offcoil"
-names(dataset)[22]<-"setpoint_temperatura_offcoil"
-names(dataset)[23]<-"presion_filtro"
-names(dataset)[24]<-"humedad_suministro_aire"
-names(dataset)[25]<-"presion_suministro_aire"
-names(dataset)[26]<-"temperatura_suministro_aire"
-names(dataset)[27]<-"presion_barametrica"
-names(dataset)[28]<-"temperatura_exterior"
-names(dataset)[29]<-"radiacion_solar_global_horizontal"
-names(dataset)[30]<-"direccion_viento"
-names(dataset)[31]<-"velocidad_viento"
-names(dataset)[32]<-"co2_exterior"
-names(dataset)[33]<-"humedad_relativa_exterior"
-names(dataset)[34]<-"ocupantes_presencia"
-names(dataset)[35]<-"ocupantes_conteo"
+{
+  names(dataset)[1]<-"marca_tiempo"
+  names(dataset)[2]<-"voc"
+  names(dataset)[3]<-"presion sonora"
+  names(dataset)[4]<-"humedad_relativa_interior"
+  names(dataset)[5]<-"temperatura_interior"
+  names(dataset)[6]<-"iluminancia_interior"
+  names(dataset)[7]<-"pm2.5"
+  names(dataset)[8]<-"co2_interior"
+  names(dataset)[9]<-"dispositivos_contectados_wifi"
+  names(dataset)[10]<-"energia_ventilador_techo"
+  names(dataset)[11]<-"energia_iluminacion"
+  names(dataset)[12]<-"energia_enchufes"
+  names(dataset)[13]<-"energia_agua_refrigerada"
+  names(dataset)[14]<-"energia_ventilador_ahu"
+  names(dataset)[15]<-"suministro_aire"
+  names(dataset)[16]<-"posicion_damper"
+  names(dataset)[17]<-"setpoint_temperatura"
+  names(dataset)[18]<-"posicion_valvula_bobina_enfriamiento"
+  names(dataset)[19]<-"comando_valvula_bobina_enfriamiento"
+  names(dataset)[20]<-"velocidad_ventilador_ahu"
+  names(dataset)[21]<-"temperatura_ambiental_offcoil"
+  names(dataset)[22]<-"setpoint_temperatura_offcoil"
+  names(dataset)[23]<-"presion_filtro"
+  names(dataset)[24]<-"humedad_suministro_aire"
+  names(dataset)[25]<-"presion_suministro_aire"
+  names(dataset)[26]<-"temperatura_suministro_aire"
+  names(dataset)[27]<-"presion_barametrica"
+  names(dataset)[28]<-"temperatura_exterior"
+  names(dataset)[29]<-"radiacion_solar_global_horizontal"
+  names(dataset)[30]<-"direccion_viento"
+  names(dataset)[31]<-"velocidad_viento"
+  names(dataset)[32]<-"co2_exterior"
+  names(dataset)[33]<-"humedad_relativa_exterior"
+  names(dataset)[34]<-"ocupantes_presencia"
+  names(dataset)[35]<-"ocupantes_conteo"
+}
 
 #-------------------------------------------------------------------------------
 
@@ -113,10 +115,12 @@ ocupantes_conteo_robus5<-rollmean(dataset$ocupantes_conteo,
 # Generación de un subset para la marca de tiempo y las medias móviles de
 # ocupación
 
-marca_tiempo<-dataset$marca_tiempo
-
-subset<-data.frame(marca_tiempo, 
-                   ocupantes_conteo_robus3, ocupantes_conteo_robus5)
+{
+  marca_tiempo<-dataset$marca_tiempo
+  
+  subset<-data.frame(marca_tiempo, 
+                     ocupantes_conteo_robus3, ocupantes_conteo_robus5)
+}
 
 #-------------------------------------------------------------------------------
 
@@ -142,53 +146,60 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
   # día del que se tiene datos.
 
     # Variables auxiliares para los bucles
-
-exit<-0
-i<-1
-j<-1
+{
+  exit<-0
+  i<-1
+  j<-1
+}
 
     # Bucle para obtener el número de fila en el que empieza el primer día
 
-while (exit!=1) {
-  if (as.numeric(format(subset[i,"marca_tiempo"],"%H"))==00 & 
-      as.numeric(format(subset[i,"marca_tiempo"],"%M"))==00) {
-    exit<-1
-  } else {
-    i<-i+1
+{
+  while (exit!=1) {
+    if (as.numeric(format(subset[i,"marca_tiempo"],"%H"))==00 & 
+        as.numeric(format(subset[i,"marca_tiempo"],"%M"))==00) {
+      exit<-1
+    } else {
+      i<-i+1
+    }
   }
+  comienzo<-i
 }
-comienzo<-i
 
     # Bucle para obtener el número de fila en el que acaba el primer día
 
-exit<-0
-
-while (exit!=1) {
-  if (as.numeric(format(subset[i,"marca_tiempo"],"%H"))==23 &
-      as.numeric(format(subset[i,"marca_tiempo"],"%M"))==55) {
-    exit<-1
-  } else {
-    i<-i+1
+{
+  exit<-0
+  
+  while (exit!=1) {
+    if (as.numeric(format(subset[i,"marca_tiempo"],"%H"))==23 &
+        as.numeric(format(subset[i,"marca_tiempo"],"%M"))==55) {
+      exit<-1
+    } else {
+      i<-i+1
+    }
   }
+  
+  final<-i
 }
-
-final<-i
 
   # Graficación de ambas medias móviles
 
-png(paste(wd,"/plots/ocupantes_conteo_robus3_primer_dia.png",sep=""), 
-    width=800, height=800)
-plot(subset$marca_tiempo[comienzo:final],
-     subset$ocupantes_conteo_robus3[comienzo:final],
-     xlab="hora", ylab="número de ocupantes")
-dev.off()
-
-png(paste(wd,"/plots/ocupantes_conteo_robus5_primer_dia.png",sep=""),
-    width=800, height=800)
-plot(subset$marca_tiempo[comienzo:final],
-     subset$ocupantes_conteo_robus5[comienzo:final],
-     xlab="hora", ylab="número de ocupantes")
-dev.off()
+{
+  png(paste(wd,"/plots/ocupantes_conteo_robus3_primer_dia.png",sep=""), 
+      width=800, height=800)
+  plot(subset$marca_tiempo[comienzo:final],
+       subset$ocupantes_conteo_robus3[comienzo:final],
+       xlab="hora", ylab="número de ocupantes")
+  dev.off()
+  
+  png(paste(wd,"/plots/ocupantes_conteo_robus5_primer_dia.png",sep=""),
+      width=800, height=800)
+  plot(subset$marca_tiempo[comienzo:final],
+       subset$ocupantes_conteo_robus5[comienzo:final],
+       xlab="hora", ylab="número de ocupantes")
+  dev.off() 
+}
 
 #-------------------------------------------------------------------------------
 
@@ -267,16 +278,18 @@ library(lubridate)
   # L_st: longitud de la localización en cuestión.
   # L_loc: longitud meridiano estándar para la zona horaria local.
 
-L_loc<-8*15
-L_st<-103.850077
-
-B<-(as.numeric(strftime(dataset$marca_tiempo,format="%j"))-1)*360/365
-
-E<-229.2*(0.000075+
-            0.001868*cos(B*pi/180)-
-            0.032077*sin(B*pi/180)-
-            0.014615*cos(2*B*pi/180)-
-            0.04089*sin(2*B*pi/180))
+{
+  L_loc<-8*15
+  L_st<-103.850077
+  
+  B<-(as.numeric(strftime(dataset$marca_tiempo,format="%j"))-1)*360/365
+  
+  E<-229.2*(0.000075+
+              0.001868*cos(B*pi/180)-
+              0.032077*sin(B*pi/180)-
+              0.014615*cos(2*B*pi/180)-
+              0.04089*sin(2*B*pi/180))
+}
 
 hora_solar<-dataset$marca_tiempo + seconds_to_period(60*(4*(L_st-L_loc)+E))
 
@@ -432,16 +445,18 @@ rm(acimut,altura, angulo_horario,B,cenit,cociente,declinacion,diferencia,i,
 # Diferenciación entre radiación disufa y directa
   # Se eligen 100 W*m^2 como límite de la radiación difusa
 
-radiacion_difusa<-0
-for (i in 1:nrow(dataset)){
-  if (dataset$radiacion_solar_global_horizontal[i]<100){
-    radiacion_difusa[i]<-dataset$radiacion_solar_global_horizontal[i]
-  }else{
-    radiacion_difusa[i]<-100
+{
+  radiacion_difusa<-0
+  for (i in 1:nrow(dataset)){
+    if (dataset$radiacion_solar_global_horizontal[i]<100){
+      radiacion_difusa[i]<-dataset$radiacion_solar_global_horizontal[i]
+    }else{
+      radiacion_difusa[i]<-100
+    }
   }
+  
+  radiacion_directa_horizontal<-dataset$radiacion_solar_global_horizontal-radiacion_difusa
 }
-
-radiacion_directa_horizontal<-dataset$radiacion_solar_global_horizontal-radiacion_difusa
 
 #-------------------------------------------------------------------------------
 
@@ -493,22 +508,24 @@ dataset<-cbind(dataset, radiacion_global_fachada, radiacion_difusa,
 
 # Generación de un  dataset con todas las variables solares
 
-marca_tiempo<-dataset$marca_tiempo
-hora_solar<-dataset$hora_solar
-acimut<-dataset$acimut
-altura<-dataset$altura
-cenit<-dataset$cenit
-radiacion_solar_global_horizontal<-dataset$radiacion_solar_global_horizontal
-
-dataset_solar<-cbind(marca_tiempo, hora_solar,
-               acimut, altura, cenit,
-               radiacion_solar_global_horizontal,
-               radiacion_difusa, radiacion_directa_horizontal,
-               radiacion_directa_perpendicular,
-               radiacion_directa_fachada, radiacion_global_fachada)
-
-write.csv2(dataset_solar, paste(wd,"/datasets/room4_var_solar.csv",sep=""), 
-           row.names=FALSE)
+{
+  marca_tiempo<-dataset$marca_tiempo
+  hora_solar<-dataset$hora_solar
+  acimut<-dataset$acimut
+  altura<-dataset$altura
+  cenit<-dataset$cenit
+  radiacion_solar_global_horizontal<-dataset$radiacion_solar_global_horizontal
+  
+  dataset_solar<-cbind(marca_tiempo, hora_solar,
+                       acimut, altura, cenit,
+                       radiacion_solar_global_horizontal,
+                       radiacion_difusa, radiacion_directa_horizontal,
+                       radiacion_directa_perpendicular,
+                       radiacion_directa_fachada, radiacion_global_fachada)
+  
+  write.csv2(dataset_solar, paste(wd,"/datasets/room4_var_solar.csv",sep=""), 
+             row.names=FALSE)
+}
 
 #-------------------------------------------------------------------------------
 
@@ -526,104 +543,119 @@ dataset$hora_solar<-as.POSIXct(strftime(dataset$hora_solar,
 # Bucles para delimitar los días y graficación
   # Día con mucha radiación solar: 2021/09/10
 
-exit<-0
-i<-1
-j<-1
+{
+  exit<-0
+  i<-1
+  j<-1
+}
 
     # Bucle para obtener el número de fila en el que empieza el día 2021/09/10
-while (exit!=1) {
-  if (as.numeric(format(dataset[i,"hora_solar"],"%d"))==10 & 
-      as.numeric(format(dataset[i,"hora_solar"],"%m"))==9 & 
-      as.numeric(format(dataset[i,"hora_solar"],"%H"))==00) {
-    exit<-1
-  } else {
-    i<-i+1
+{
+  while (exit!=1) {
+    if (as.numeric(format(dataset[i,"hora_solar"],"%d"))==10 & 
+        as.numeric(format(dataset[i,"hora_solar"],"%m"))==9 & 
+        as.numeric(format(dataset[i,"hora_solar"],"%H"))==00) {
+      exit<-1
+    } else {
+      i<-i+1
+    }
   }
+  
+  comienzo<-i
+  
+  exit<-0 
 }
-
-comienzo<-i
-
-exit<-0
 
     # Bucle para obtener el número de fila en el que acaba el día 2021/09/10
-while (exit!=1) {
-  if (as.numeric(format(dataset[i,"hora_solar"],"%d"))!=10) {
-    exit<-1
-  } else {
-    i<-i+1
+{
+  while (exit!=1) {
+    if (as.numeric(format(dataset[i,"hora_solar"],"%d"))!=10) {
+      exit<-1
+    } else {
+      i<-i+1
+    }
   }
+  
+  final<-i-1
+  
+  dia10<-dataset[comienzo:final,]
 }
-
-final<-i-1
-
-dia10<-dataset[comienzo:final,]
 
     # Generación del archivo PNG con las gráficas
-
-png(paste(wd,"/plots/dia_alta_radiacion.png",sep=""), width=800, height=800)
-plot(dia10$hora_solar, dia10$radiacion_solar_global_horizontal,
-     xlab="hora", ylab="radiación [W/m2]",col="red",cex=1.5,
-     ylim=c(min(dia10$radiacion_solar_global_horizontal),
-            max(dia10$radiacion_solar_global_horizontal)))
-points(dia10$hora_solar, dia10$radiacion_difusa, col="blue", cex=1.5)
-points(dia10$hora_solar, dia10$radiacion_directa_fachada, col="yellow", cex=1.5)
-legend(x="topleft", legend=c("Radiación solar global horizontal", 
-                             "Radiación difusa",
-                             "Radiación directa s/ fachada"),
-       col=c("red", "blue", "yellow"),
-       lty=c(1, 1, 1, 1),
-       cex=1.4)
-dev.off()
+{
+  png(paste(wd,"/plots/dia_alta_radiacion.png",sep=""), width=800, height=800)
+  plot(dia10$hora_solar, dia10$radiacion_solar_global_horizontal,
+       xlab="hora", ylab="radiación [W/m2]",col="red",cex=1.5,
+       ylim=c(min(dia10$radiacion_solar_global_horizontal),
+              max(dia10$radiacion_solar_global_horizontal)))
+  points(dia10$hora_solar, dia10$radiacion_difusa, col="blue", cex=1.5)
+  points(dia10$hora_solar, dia10$radiacion_directa_fachada, col="yellow", cex=1.5)
+  legend(x="topleft", legend=c("Radiación solar global horizontal", 
+                               "Radiación difusa",
+                               "Radiación directa s/ fachada"),
+         col=c("red", "blue", "yellow"),
+         lty=c(1, 1, 1, 1),
+         cex=1.4)
+  dev.off()
+}
 
   # Día con poca radiación solar: 2021/09/13
-exit<-0
-i<-1
-j<-1
+{
+  exit<-0
+  i<-1
+  j<-1
+}
 
     # Bucle para obtener el número de fila en el que empieza el día 2021/09/13
-while (exit!=1) {
-  if (as.numeric(format(dataset[i,"hora_solar"],"%d"))==13 & 
-      as.numeric(format(dataset[i,"hora_solar"],"%m"))==9 & 
-      as.numeric(format(dataset[i,"hora_solar"],"%H"))==00) {
-    exit<-1
-  } else {
-    i<-i+1
+{
+  while (exit!=1) {
+    if (as.numeric(format(dataset[i,"hora_solar"],"%d"))==13 & 
+        as.numeric(format(dataset[i,"hora_solar"],"%m"))==9 & 
+        as.numeric(format(dataset[i,"hora_solar"],"%H"))==00) {
+      exit<-1
+    } else {
+      i<-i+1
+    }
   }
+  
+  comienzo<-i
+  
+  exit<-0
 }
-
-comienzo<-i
-
-exit<-0
 
     # Bucle para obtener el número de fila en el que acaba el día 2021/09/13
-while (exit!=1) {
-  if (as.numeric(format(dataset[i,"hora_solar"],"%d"))!=13) {
-    exit<-1
-  } else {
-    i<-i+1
+{
+  while (exit!=1) {
+    if (as.numeric(format(dataset[i,"hora_solar"],"%d"))!=13) {
+      exit<-1
+    } else {
+      i<-i+1
+    }
   }
+  
+  final<-i-1
 }
-
-final<-i-1
 
 dia13<-dataset[comienzo:final,]
 
 # Generación del archivo PNG con las gráficas
 
-png(paste(getwd(),"/plots/dia_baja_radiacion.png",sep=""), width=800, height=800)
-plot(dia13$hora_solar, dia13$radiacion_solar_global_horizontal, xlab="hora",
-     ylab="radiación [W/m2]",col="red",cex=1.5,
-     ylim=c(min(dia10$radiacion_solar_global_horizontal),
-            max(dia10$radiacion_solar_global_horizontal)))
-points(dia13$hora_solar, dia13$radiacion_difusa, col="blue", cex=1.5)
-points(dia13$hora_solar, dia13$radiacion_directa_fachada, col="yellow", cex=1.5)
-legend(x="topleft", legend=c("Radiación solar global horizontal", 
-                             "Radiación difusa",
-                             "Radiación directa s/ fachada"),
-       col=c("red", "blue", "yellow"),
-       lty=c(1, 1, 1, 1),
-       cex=1.4)
-dev.off()
+{
+  png(paste(getwd(),"/plots/dia_baja_radiacion.png",sep=""), width=800, height=800)
+  plot(dia13$hora_solar, dia13$radiacion_solar_global_horizontal, xlab="hora",
+       ylab="radiación [W/m2]",col="red",cex=1.5,
+       ylim=c(min(dia10$radiacion_solar_global_horizontal),
+              max(dia10$radiacion_solar_global_horizontal)))
+  points(dia13$hora_solar, dia13$radiacion_difusa, col="blue", cex=1.5)
+  points(dia13$hora_solar, dia13$radiacion_directa_fachada, col="yellow", cex=1.5)
+  legend(x="topleft", legend=c("Radiación solar global horizontal", 
+                               "Radiación difusa",
+                               "Radiación directa s/ fachada"),
+         col=c("red", "blue", "yellow"),
+         lty=c(1, 1, 1, 1),
+         cex=1.4)
+  dev.off()
+}
 
 #-------------------------------------------------------------------------------
 
@@ -649,7 +681,8 @@ rm(acimut,acimut_aparente,acimut_plano,altura,cenit,
 # Creación de un dataframe que contenga únicamente las variables que se van a
 # emplear para las regresiones
 
-variables<-c("hora_solar",
+variables<-c("marca_tiempo",
+             "hora_solar",
              "ocupantes_conteo_robus3",
              "temperatura_exterior",
              "temperatura_interior",
@@ -670,34 +703,88 @@ for(i in 1:length(dataframe)){
 
 #-------------------------------------------------------------------------------
 
+# Creación de los diferentes dataframes en función del tiempo de sampleo deseado
+# Se calculan medias móviles
 
-sampleo<-c(15,30,60)
+sampleo<-c(15,30,60) # Introducir en este vector los tiempos de sampleo deseados
 
-lista<-list(NULL, variables)
+for (i in 1:length(sampleo)){
+ 
+  n_elementos<-sampleo[i]/5
+  
+  dataframe_trabajo<-dataframe
 
-n_elementos<-sampleo/5
-
-
-
-
-
-for(i in 1:length(sampleo)){
-  assign(paste("dataframe_",sampleo[i],sep=""),
-         data.frame(matrix(rnorm(length(variables),nrow(dataset)),
-                           nrow=nrow(dataset),ncol=length(variables),
-                           dimnames=lista)))
+  for (j in 1:length(dataframe_trabajo)){
+    if (names(dataframe[j])!="marca_tiempo" & 
+        names(dataframe[j])!="hora_solar"){
+      dataframe_trabajo[, j]<-rollmean(dataframe_trabajo[, j], k=n_elementos, 
+                                       fill=NA, align="center") 
+    }
+  }
+  
+  dataframe_trabajo<-na.omit(dataframe_trabajo) 
+  # Quitar los NA que salen al hacer la media móvil
+  
+  dataframe_trabajo<-subset(dataframe_trabajo,
+                            as.numeric(format(dataframe_trabajo$marca_tiempo,
+                                              "%M")) %% sampleo[i] ==0)
+  
+  nombre_dataframe<-paste("dataframe", sampleo[i], sep="_")
+  assign(nombre_dataframe, dataframe_trabajo)
 }
 
-ocupantes_conteo_robus3<-rollmean(dataset$ocupantes_conteo,k=n_elementos,fill=NA,align="center")
-temperatura_exterior<-rollmean(dataset$temperatura_exterior,k=n_elementos,fill=NA,align="center")
-temperatura_interior<-rollmean(dataset$temperatura_interior,k=n_elementos,fill=NA,align="center")
-energia_agua_refrigerada<-rollmean(dataset$energia_agua_refrigerada,k=n_elementos,fill=NA,align="center")
-radiacion_directa_fachada<-rollmean(dataset$radiacion_directa_fachada,k=n_elementos,fill=NA,align="center")
-radiacion_global_fachada<-rollmean(dataset$radiacion_global_fachada,k=n_elementos,fill=NA,align="center")
-assign(paste("dataset_",sampleo[i],sep=""),
-       data.frame(ocupantes_conteo_robus3,
-                  temperatura_exterior,
-                  temperatura_interior,
-                  energia_agua_refrigerada,
-                  radiacion_directa_fachada,
-                  radiacion_global_fachada))
+#-------------------------------------------------------------------------------
+
+# Limpiado de variables
+
+rm(dataframe,
+   dataframe_trabajo,
+   dataset,
+   i,j,
+   n_elementos,
+   nombre_dataframe,
+   variables)
+
+#===============================================================================
+
+#===============================================================================
+# Preparación de los dataframes para los modelos ARX añadiendo variables que
+# recojan las observaciones anteriores (hasta 12) para cada variable
+#-------------------------------------------------------------------------------
+
+# 
+
+for (i in 1:length(sampleo)){
+  nombre_dataframe<-paste("dataframe", sampleo[i], sep="_")
+  dataframe_trabajo<-get(nombre_dataframe)
+  
+  obs_anteriores<-12
+  
+  for (k in 1:length(dataframe_trabajo)){
+    for (j in 1:obs_anteriores){
+      dataframe_trabajo[[paste(names(dataframe_trabajo[k]),j,sep="_")]]<-
+        filter(dataframe_trabajo[,k], c(rep(0,j),1), sides=1)
+    }
+  }
+  
+  nombre_dataframe<-paste("dataframe", sampleo[i], sep="_")
+  assign(nombre_dataframe, dataframe_trabajo) 
+}
+
+#-------------------------------------------------------------------------------
+
+# Limpiado de variables
+
+rm(i,j,k,
+   nombre_dataframe,
+   obs_anteriores,
+   sampleo,
+   dataframe_trabajo)
+
+#===============================================================================
+
+#===============================================================================
+# Seguir por aquí
+#-------------------------------------------------------------------------------
+
+**
