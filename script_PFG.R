@@ -516,15 +516,18 @@ dataset<-cbind(dataset, radiacion_global_fachada, radiacion_difusa,
   cenit<-dataset$cenit
   radiacion_solar_global_horizontal<-dataset$radiacion_solar_global_horizontal
   
-  dataset_solar<-cbind(marca_tiempo, hora_solar,
-                       acimut, altura, cenit,
-                       radiacion_solar_global_horizontal,
-                       radiacion_difusa, radiacion_directa_horizontal,
-                       radiacion_directa_perpendicular,
-                       radiacion_directa_fachada, radiacion_global_fachada)
+  dataset_solar<-data.frame(marca_tiempo, hora_solar,
+                            acimut, altura, cenit,
+                            radiacion_solar_global_horizontal,
+                            radiacion_difusa, radiacion_directa_horizontal,
+                            radiacion_directa_perpendicular,
+                            radiacion_directa_fachada, radiacion_global_fachada)
+  
+  dataset_solar$marca_tiempo<-as.character(dataset_solar$marca_tiempo)
+  dataset_solar$hora_solar<-as.character(dataset_solar$hora_solar)
   
   write.csv2(dataset_solar, paste(wd,"/datasets/room4_var_solar.csv",sep=""), 
-             row.names=FALSE)
+             row.names=FALSE) 
 }
 
 #-------------------------------------------------------------------------------
@@ -737,8 +740,7 @@ for (i in 1:length(sampleo)){
 
 # Limpiado de variables
 
-rm(dataframe,
-   dataframe_trabajo,
+rm(dataframe_trabajo,
    dataset,
    i,j,
    n_elementos,
@@ -752,13 +754,13 @@ rm(dataframe,
 # recojan las observaciones anteriores (hasta 12) para cada variable
 #-------------------------------------------------------------------------------
 
-# 
-
 for (i in 1:length(sampleo)){
   nombre_dataframe<-paste("dataframe", sampleo[i], sep="_")
   dataframe_trabajo<-get(nombre_dataframe)
   
-  obs_anteriores<-12
+  horas_anteriores<-6
+  
+  obs_anteriores<-horas_anteriores*60/sampleo[i]
   
   for (k in 1:length(dataframe_trabajo)){
     for (j in 1:obs_anteriores){
@@ -777,14 +779,31 @@ for (i in 1:length(sampleo)){
 
 rm(i,j,k,
    nombre_dataframe,
-   obs_anteriores,
-   sampleo,
+   obs_anteriores,horas_anteriores,
    dataframe_trabajo)
 
 #===============================================================================
 
 #===============================================================================
-# Seguir por aquí
+# Modelos ARX
 #-------------------------------------------------------------------------------
 
-**
+sampleo<-15
+
+nombre_dataframe<-paste("dataframe", sampleo, sep="_")
+dataframe_trabajo<-get(nombre_dataframe)
+
+# El modelo inicial comienza con la última observación de las variables:
+  # - Temperatura interior
+  # - Temperatura exterior
+  # - Radiación
+
+for(i in 3:length(dataframe)){
+  formula<-"dataframe_trabajo$temperatura_interior ~ dataframe_trabajo$temperatura_interior_1+"
+  if (names(dataframe_trabajo[i])!="temperatura_interior"){
+    adicion<-paste("dataframe_trabajo$",names(dataframe_trabajo[i]),sep="")
+    formula<-paste(formula,adicion,sep="")
+    arx<-lm(formula)
+    print(summary(arx)$r.squared)
+  }
+}
