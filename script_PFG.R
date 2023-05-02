@@ -89,6 +89,13 @@ dataset<-na.omit(dataset)
 dataset$marca_tiempo<-as.POSIXct(strftime(dataset$marca_tiempo, 
                                           format = "%Y-%m-%d %H:%M:%OS"))
 
+#-------------------------------------------------------------------------------
+
+# Exportar dataset
+
+write.csv2(dataset, paste(wd,"/datasets/room4_preprocesado.csv",sep=""), 
+           row.names=FALSE) 
+
 #===============================================================================
 
 #===============================================================================
@@ -682,7 +689,8 @@ rm(acimut,acimut_aparente,acimut_plano,altura,cenit,
 #-------------------------------------------------------------------------------
 
 # Creación de un dataframe que contenga únicamente las variables que se van a
-# emplear para las regresiones
+# emplear para las regresiones (o por lo menos para la preparación del dataset
+# previo a las regresiones)
 
 variables<-c("marca_tiempo",
              "hora_solar",
@@ -690,7 +698,6 @@ variables<-c("marca_tiempo",
              "temperatura_exterior",
              "temperatura_interior",
              "energia_agua_refrigerada",
-             "radiacion_directa_fachada",
              "radiacion_global_fachada")
 
 dataframe<-data.frame(matrix(ncol=length(variables),nrow=nrow(dataset)))
@@ -788,22 +795,52 @@ rm(i,j,k,
 # Modelos ARX
 #-------------------------------------------------------------------------------
 
-sampleo<-15
+sampleo<-60
 
 nombre_dataframe<-paste("dataframe", sampleo, sep="_")
 dataframe_trabajo<-get(nombre_dataframe)
 
-# El modelo inicial comienza con la última observación de las variables:
-  # - Temperatura interior
-  # - Temperatura exterior
-  # - Radiación
+variables_regresion_input<-c("ocupantes_conteo_robus3",
+                              "temperatura_exterior",
+                              "energia_agua_refrigerada",
+                              "radiacion_global_fachada")
 
-for(i in 3:length(dataframe)){
-  formula<-"dataframe_trabajo$temperatura_interior ~ dataframe_trabajo$temperatura_interior_1+"
-  if (names(dataframe_trabajo[i])!="temperatura_interior"){
-    adicion<-paste("dataframe_trabajo$",names(dataframe_trabajo[i]),sep="")
-    formula<-paste(formula,adicion,sep="")
+regresion_output<-"temperatura_interior"
+
+formula_inicio<-paste(regresion_output, 
+                      " ~ 0 + temperatura_interior_1 +",
+                      sep="")
+
+attach (dataframe_trabajo)
+
+for (i in 1:length(variables_regresion_input)){
+  formula<-paste(formula_inicio, variables_regresion_input[i])
+  arx<-lm(formula)
+  print(summary(arx))
+}
+
+num_inst_prev_max<-4
+
+for (k in 1:num_inst_prev_max){
+  for (i in 1:length(variables_regresion_input)){
+    formula<-formula_inicio
+    for (j in 1:k){
+      if (j>1){
+        nombre_var<-paste(regresion_output, "_", j, sep="")
+        formula<-paste(formula, " + ", nombre_var, sep="")
+      }
+      nombre_var<-paste(variables_regresion_input[i], "_", j, sep="")
+      formula<-paste(formula, " + ", nombre_var, sep="")
+    }
     arx<-lm(formula)
-    print(summary(arx)$r.squared)
+    print(summary(arx))
   }
 }
+
+detach(dataframe_trabajo)
+
+# Con esto se ve que las variables más explicativas son:
+
+# Modelo de dos variables que mejor ajusta:
+  # temperatura_interior ~ 0 + temperatura_interior_1 + 
+
