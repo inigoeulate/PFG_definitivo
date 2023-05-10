@@ -1,8 +1,9 @@
 #===============================================================================
 #===============================================================================
 # En este script se programan todas operaciones necesarias para la obtención de
-# los resulados del PFG "INSERTAR TÍTULO DEL PFG" elaborado por el estudiante
-# Iñigo García de Eulate Pascual (5ºADE+ITI Universidad de Deusto) en
+# los resulados del PFG "Desarrollo de modelos de caracterización a corto plazo
+# de la evolución térmico-energética en edificios" elaborado por el estudiante
+# Iñigo García de Eulate Pascual (5ºADE+ITI, Universidad de Deusto) en
 # colaboración con el tutor del PFG Roberto Garay Martínez.
 #===============================================================================
 #===============================================================================
@@ -798,23 +799,22 @@ for (i in 1:length(sampleo)){
 
 rm(i,j,k,
    nombre_dataframe,
+   obs_anteriores,
    dataframe_trabajo)
 
 #===============================================================================
 
 #===============================================================================
-# Modelos ARX
+# Primer modelo ARX: se ponen todas las variables para todos los pasos de tiempo
+# anteriores y se van quitando las no signficiativas, hasta quedar solo las 
+# significativas
 #-------------------------------------------------------------------------------
 
-# for (l in 1:length(sampleo)){
-  # nombre_dataframe<-paste("dataframe", sampleo[l], sep="_")
-  # dataframe_trabajo<-get(nombre_dataframe)  
-  # obs_anteriores<-horas_anteriores*60/sampleo[i]
-# }
+# Nos centramos en el modelo con sampleo de 60 minutos
 
-sampleo<-60 # Al hacer todos los sampleos quitar
+sampleo<-60
 
-nombre_dataframe<-paste("dataframe", sampleo, sep="_") # Al hacer todos los sampleos esto cambia (sampleo[l])
+nombre_dataframe<-paste("dataframe", sampleo, sep="_")
 dataframe_trabajo<-get(nombre_dataframe)
 
 #-------------------------------------------------------------------------------
@@ -838,7 +838,7 @@ dataframe_trabajo<-get(nombre_dataframe)
       formula<-paste(formula, " +", sep="") 
   }
   
-  obs_anteriores<-horas_anteriores*60/sampleo # Al hacer todos los sampleos esto cambia
+  obs_anteriores<-horas_anteriores*60/sampleo
   
   for (i in 1:obs_anteriores) {
     nombre_var<-paste(regresion_output, "_", i, sep="")
@@ -878,9 +878,13 @@ temperatura_interior_med<-
 # Creación de la matriz de resultados e introducción de los resultados del
 # primer modelo ARX
 
-matriz_resultados<-matrix(nrow=length(names(arx$coefficients))+2,
+numero_filas=length(names(arx$coefficients))+2
+
+nombres_filas<-c(names(arx$coefficients), "R2", "MAE")
+
+matriz_resultados<-matrix(nrow=numero_filas,
                           ncol=length(names(arx$coefficients)))
-rownames(matriz_resultados)<-c(names(arx$coefficients), "R2", "MAE")
+rownames(matriz_resultados)<-nombres_filas
 matriz_resultados[,1]<-c(a[["coefficients"]][,4],
                          summary(arx)$r.squared,
                          mae(temperatura_interior_med,
@@ -910,6 +914,7 @@ matriz_resultados[,1]<-c(a[["coefficients"]][,4],
       quitar=""
       y=0
     }
+    
     formula<-gsub(quitar, "", formula)
     
     attach (dataframe_trabajo)
@@ -946,52 +951,160 @@ matriz_resultados[,1]<-c(a[["coefficients"]][,4],
 # Limpiado de variables
 
 rm(formula,
-   horas_anteriores, obs_anteriores,
+   horas_anteriores,
    i, j, k,
    minimo,
    nombre_dataframe,
    nombre_var,
    quitar,
-   regresion_output, variables_regresion_input,
    sampleo,
    y,
    a, arx,
-   dataframe, dataframe_trabajo)
+   dataframe)
 
 #===============================================================================
 
 #===============================================================================
-# Graficación del último ARX
-# OJO: cuando lo haga con todos los sampleos, habrá que meter este paso al final del bucle for de sampleo[l]
+# Graficación del primer ARX
 #-------------------------------------------------------------------------------
 
-plot (temperatura_interior_med, temperatura_interior_pred, 
-      xlab="Temperatura interior medida [ºC]", 
-      ylab="Temperatura interior predicha [ºC]")
+{
+  plot (temperatura_interior_med, temperatura_interior_pred, 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]")
+  
+  png(paste(getwd(),"/plots/temp_interior_med_vs_pred.png",sep=""), width=800, 
+      height=800)
+  plot (temperatura_interior_med, temperatura_interior_pred, 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]")
+  dev.off()
+}
 
-png(paste(getwd(),"/plots/temp_interior_med_vs_pred.png",sep=""), width=800, 
-    height=800)
-plot (temperatura_interior_med, temperatura_interior_pred, 
-      xlab="Temperatura interior medida [ºC]", 
-      ylab="Temperatura interior predicha [ºC]")
-dev.off()
+{
+  dataframe_trabajo$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
+                                                    format = "%Y-%m-%d %H:%M:%OS"))
+  
+  plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],temperatura_interior_med,
+       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=0.5)
+  points(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
+         temperatura_interior_pred, col="blue", cex=0.5)
+  legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
+                               "Temperatura interior predicha [ºC]"),
+         col=c("red","blue"),
+         lty=c(1,1),
+         cex=0.5)
+  
+  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_con_marca_tiempo.png",
+            sep=""), 
+      width=800, 
+      height=800)
+  plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],temperatura_interior_med,
+       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5)
+  points(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
+         temperatura_interior_pred, col="blue", cex=1.5)
+  legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
+                               "Temperatura interior predicha [ºC]"),
+         col=c("red","blue"),
+         lty=c(1,1),
+         cex=1.5)
+  dev.off() 
+}
 
-dataframe_60$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
-                                          format = "%Y-%m-%d %H:%M:%OS"))
+#-------------------------------------------------------------------------------
 
-# Cuando lo meta en el bucle for de sampleo[l], cambiar "dataframe_60" por "dataframe_trabajo"
-plot(dataframe_60$hora_solar[x:nrow(dataframe_60)],temperatura_interior_med,
-     xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=0.5)
-points(dataframe_60$hora_solar[x:nrow(dataframe_60)],
-       temperatura_interior_pred, col="blue", cex=0.5)
-legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
-                             "Temperatura interior predicha [ºC]"),
-       col=c("red","blue"),
-       lty=c(1,1),
-       cex=0.5)
+# Limpiado de variables
+
+rm(temperatura_interior_med, temperatura_interior_pred,
+   x,
+   matriz_resultados)
 
 #===============================================================================
 
 #===============================================================================
-# Siguiente paso
+# Segundo(s) ARX: instante de tiempo actual y se va añadiendo cada vez un
+# instante de tiempo pasado
+#-------------------------------------------------------------------------------
+
+dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
+rownames(dataframe_resultados)<-nombres_filas
+colnames(dataframe_resultados)<-"instante_actual"
+
+for (j in 0:obs_anteriores){
+  formula<-paste(regresion_output, " ~ 0 +", sep="")
+  
+  for (i in 1:length(variables_regresion_input)){
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input)){
+      formula<-paste(formula, " +", sep="")
+    }
+  }
+  
+  if (j>0){
+    for (i in 1:j) {
+      nombre_var<-paste(regresion_output, "_", i, sep="")
+      formula<-paste(formula, " + ", nombre_var, sep="") 
+      
+      nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+      
+      for (k in 1:length(nombre_var)) {
+        formula<-paste(formula, " + ",nombre_var[k], sep="")
+      }
+    }
+  }
+  
+  attach(dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+  
+  x<-j+1
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+  
+  if (j==0){
+    for (i in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(names(arx$coefficients))){
+        if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+          dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(dataframe_resultados)[i] == "R2"){
+        dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[i] == "MAE"){
+        dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med, temperatura_interior_pred)
+      }
+    }
+  } else {
+    nombre_columna<-paste("instante_pasado", j, sep="_")
+    dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
+    colnames(dataframe_resultados)[j+1]<-nombre_columna
+    for (i in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(names(arx$coefficients))){
+        if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+          dataframe_resultados[i,j+1]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(dataframe_resultados)[i] == "R2"){
+        dataframe_resultados[i,j+1]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[i] == "MAE"){
+        dataframe_resultados[i,j+1]<-mae(temperatura_interior_med, temperatura_interior_pred)
+      }
+    }
+  }
+}
+
+#===============================================================================
+
+
+#===============================================================================
+# X ARX: a partir del ARX con el instante de tiempo actual y los X anteriores
+# (se elige porque tiene un R2>0,95), se analiza la significatividad de las
+# variables desde las mas antiguas
+  # Ejemplo: si el quinto instante anterior de la radiación solar es significativo,
+  # se consideran como significativos lo instantes del quinto al actual para la
+  # radiacion solar
 #-------------------------------------------------------------------------------
