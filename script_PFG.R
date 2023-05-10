@@ -16,6 +16,29 @@
 #===============================================================================
 #===============================================================================
 
+#===============================================================================
+# Carga de librerías
+#-------------------------------------------------------------------------------
+
+# Librería "zoo" que permite emplear la función rollemean para el cálculo de
+# medias móviles.
+
+library(zoo)
+
+#-------------------------------------------------------------------------------
+
+# Librería "lubridate" que introduce funciones para facilitar el manejo de
+# fechas.
+
+library(lubridate)
+
+#-------------------------------------------------------------------------------
+
+# Librería "Metrics" que permite calcular el MAE automáticamente.
+
+library(Metrics)
+
+#===============================================================================
 
 #===============================================================================
 # Obtención del archivo .csv con los datos
@@ -100,13 +123,6 @@ write.csv2(dataset, paste(wd,"/datasets/room4_preprocesado.csv",sep=""),
 
 #===============================================================================
 # Mejora de la robustez de la señal de ocupación por conteo
-#-------------------------------------------------------------------------------
-
-# Librería "zoo" que permite emplear la función rollemean para el cálculo de
-# medias móviles.
-
-library(zoo)
-
 #-------------------------------------------------------------------------------
 
 # Se hacen dos medias móviles centradas:
@@ -267,12 +283,6 @@ rm(i,j,exit,comienzo,final,subset,marca_tiempo,
 # Singapur no cambia de hora con motivo de las estaciones.
 
 # Coordenadas del edificio: 1.28967°N, 103.85007°E.
-
-#-------------------------------------------------------------------------------
-
-# Librería "lubridat" que introduce funciones para facilitar el manejo de fechas.
-
-library(lubridate)
 
 #-------------------------------------------------------------------------------
 
@@ -599,7 +609,8 @@ dataset$hora_solar<-as.POSIXct(strftime(dataset$hora_solar,
        ylim=c(min(dia10$radiacion_solar_global_horizontal),
               max(dia10$radiacion_solar_global_horizontal)))
   points(dia10$hora_solar, dia10$radiacion_difusa, col="blue", cex=1.5)
-  points(dia10$hora_solar, dia10$radiacion_directa_fachada, col="yellow", cex=1.5)
+  points(dia10$hora_solar, dia10$radiacion_directa_fachada, col="yellow", 
+         cex=1.5)
   legend(x="topleft", legend=c("Radiación solar global horizontal", 
                                "Radiación difusa",
                                "Radiación directa s/ fachada"),
@@ -651,7 +662,8 @@ dia13<-dataset[comienzo:final,]
 # Generación del archivo PNG con las gráficas
 
 {
-  png(paste(getwd(),"/plots/dia_baja_radiacion.png",sep=""), width=800, height=800)
+  png(paste(getwd(),"/plots/dia_baja_radiacion.png",sep=""), width=800, 
+      height=800)
   plot(dia13$hora_solar, dia13$radiacion_solar_global_horizontal, xlab="hora",
        ylab="radiación [W/m2]",col="red",cex=1.5,
        ylim=c(min(dia10$radiacion_solar_global_horizontal),
@@ -758,7 +770,7 @@ rm(dataframe_trabajo,
 
 #===============================================================================
 # Preparación de los dataframes para los modelos ARX añadiendo variables que
-# recojan las observaciones anteriores (hasta 12) para cada variable
+# recojan las observaciones anteriores (hasta 6 horas) para cada variable
 #-------------------------------------------------------------------------------
 
 for (i in 1:length(sampleo)){
@@ -786,7 +798,6 @@ for (i in 1:length(sampleo)){
 
 rm(i,j,k,
    nombre_dataframe,
-   obs_anteriores,horas_anteriores,
    dataframe_trabajo)
 
 #===============================================================================
@@ -795,52 +806,192 @@ rm(i,j,k,
 # Modelos ARX
 #-------------------------------------------------------------------------------
 
-sampleo<-60
+# for (l in 1:length(sampleo)){
+  # nombre_dataframe<-paste("dataframe", sampleo[l], sep="_")
+  # dataframe_trabajo<-get(nombre_dataframe)  
+  # obs_anteriores<-horas_anteriores*60/sampleo[i]
+# }
 
-nombre_dataframe<-paste("dataframe", sampleo, sep="_")
+sampleo<-60 # Al hacer todos los sampleos quitar
+
+nombre_dataframe<-paste("dataframe", sampleo, sep="_") # Al hacer todos los sampleos esto cambia (sampleo[l])
 dataframe_trabajo<-get(nombre_dataframe)
 
-variables_regresion_input<-c("ocupantes_conteo_robus3",
-                              "temperatura_exterior",
-                              "energia_agua_refrigerada",
-                              "radiacion_global_fachada")
+#-------------------------------------------------------------------------------
 
-regresion_output<-"temperatura_interior"
+# Creación de la ecuación de regresión del modelo introduciendo todas las
+# variables y todas las observaciones anteriores de las variables
 
-formula_inicio<-paste(regresion_output, 
-                      " ~ 0 + temperatura_interior_1 +",
-                      sep="")
-
-attach (dataframe_trabajo)
-
-for (i in 1:length(variables_regresion_input)){
-  formula<-paste(formula_inicio, variables_regresion_input[i])
-  arx<-lm(formula)
-  print(summary(arx))
-}
-
-num_inst_prev_max<-4
-
-for (k in 1:num_inst_prev_max){
-  for (i in 1:length(variables_regresion_input)){
-    formula<-formula_inicio
-    for (j in 1:k){
-      if (j>1){
-        nombre_var<-paste(regresion_output, "_", j, sep="")
-        formula<-paste(formula, " + ", nombre_var, sep="")
-      }
-      nombre_var<-paste(variables_regresion_input[i], "_", j, sep="")
-      formula<-paste(formula, " + ", nombre_var, sep="")
+{
+  variables_regresion_input<-c("ocupantes_conteo_robus3",
+                               "temperatura_exterior",
+                               "energia_agua_refrigerada",
+                               "radiacion_global_fachada")
+  
+  regresion_output<-"temperatura_interior"
+  
+  formula<-paste(regresion_output, " ~ 0 +", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+  
+  obs_anteriores<-horas_anteriores*60/sampleo # Al hacer todos los sampleos esto cambia
+  
+  for (i in 1:obs_anteriores) {
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    formula<-paste(formula, " + ", nombre_var, sep="") 
+    
+    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+    
+    for (j in 1:length(nombre_var)) {
+      formula<-paste(formula, " + ",nombre_var[j], sep="")
     }
-    arx<-lm(formula)
-    print(summary(arx))
   }
 }
 
-detach(dataframe_trabajo)
+#-------------------------------------------------------------------------------
 
-# Con esto se ve que las variables más explicativas son:
+# Modelo ARX con todas las variables y todas sus observaciones anteriores
 
-# Modelo de dos variables que mejor ajusta:
-  # temperatura_interior ~ 0 + temperatura_interior_1 + 
+{
+  attach (dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+}
 
+#-------------------------------------------------------------------------------
+
+# Creación de las variables temperatura interior medida y predicha
+
+x<-obs_anteriores+1
+
+temperatura_interior_pred<-predict(arx)
+temperatura_interior_med<-
+  dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+
+#-------------------------------------------------------------------------------
+
+# Creación de la matriz de resultados e introducción de los resultados del
+# primer modelo ARX
+
+matriz_resultados<-matrix(nrow=length(names(arx$coefficients))+2,
+                          ncol=length(names(arx$coefficients)))
+rownames(matriz_resultados)<-c(names(arx$coefficients), "R2", "MAE")
+matriz_resultados[,1]<-c(a[["coefficients"]][,4],
+                         summary(arx)$r.squared,
+                         mae(temperatura_interior_med,
+                             temperatura_interior_pred))
+
+#-------------------------------------------------------------------------------
+
+# Bucle para eliminar con cada iteración la variable menos significativa (la que
+# tiene "Pr(>|t|)" mayor)
+
+# La última columna de la matriz_resultados es el modelo ARX en el que todas las
+# variables son significativas ((Pr(>|t|))<0.05)
+
+{
+  j=2
+  y=1
+  
+  while (y==1) {
+    minimo<-0
+    for (i in 1:length(names(arx$coefficients))){
+      if (a[["coefficients"]][i,4]>minimo & a[["coefficients"]][i,4]>0.05){
+        minimo<-a[["coefficients"]][i,4]
+        quitar<-paste(names(arx$coefficients)[i], " ", sep="")
+      }
+    }
+    if (minimo==0){
+      quitar=""
+      y=0
+    }
+    formula<-gsub(quitar, "", formula)
+    
+    attach (dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-obs_anteriores+1
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    for (i in 1:nrow(matriz_resultados)){
+      for (k in 1:length(arx$coefficients)){
+        if (rownames(matriz_resultados)[i] == names(arx$coefficients)[k]){
+          matriz_resultados[i,j]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(matriz_resultados)[i] == "R2"){
+        matriz_resultados[i,j]<-summary(arx)$r.squared
+      }
+      if (rownames(matriz_resultados)[i] == "MAE"){
+        matriz_resultados[i,j]<-mae(temperatura_interior_med,
+                                    temperatura_interior_pred)
+      }
+    }
+    j<-j+1
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# Limpiado de variables
+
+rm(formula,
+   horas_anteriores, obs_anteriores,
+   i, j, k,
+   minimo,
+   nombre_dataframe,
+   nombre_var,
+   quitar,
+   regresion_output, variables_regresion_input,
+   sampleo,
+   y,
+   a, arx,
+   dataframe, dataframe_trabajo)
+
+#===============================================================================
+
+#===============================================================================
+# Graficación del último ARX
+# OJO: cuando lo haga con todos los sampleos, habrá que meter este paso al final del bucle for de sampleo[l]
+#-------------------------------------------------------------------------------
+
+plot (temperatura_interior_med, temperatura_interior_pred, 
+      xlab="Temperatura interior medida [ºC]", 
+      ylab="Temperatura interior predicha [ºC]")
+
+png(paste(getwd(),"/plots/temp_interior_med_vs_pred.png",sep=""), width=800, 
+    height=800)
+plot (temperatura_interior_med, temperatura_interior_pred, 
+      xlab="Temperatura interior medida [ºC]", 
+      ylab="Temperatura interior predicha [ºC]")
+dev.off()
+
+dataframe_60$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
+                                          format = "%Y-%m-%d %H:%M:%OS"))
+
+# Cuando lo meta en el bucle for de sampleo[l], cambiar "dataframe_60" por "dataframe_trabajo"
+plot(dataframe_60$hora_solar[x:nrow(dataframe_60)],temperatura_interior_med,
+     xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=0.5)
+points(dataframe_60$hora_solar[x:nrow(dataframe_60)],
+       temperatura_interior_pred, col="blue", cex=0.5)
+legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
+                             "Temperatura interior predicha [ºC]"),
+       col=c("red","blue"),
+       lty=c(1,1),
+       cex=0.5)
+
+#===============================================================================
+
+#===============================================================================
+# Siguiente paso
+#-------------------------------------------------------------------------------
