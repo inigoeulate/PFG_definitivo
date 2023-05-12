@@ -962,11 +962,9 @@ rm(formula,
    a, arx,
    dataframe)
 
-#===============================================================================
-
-#===============================================================================
-# Graficación del primer ARX
 #-------------------------------------------------------------------------------
+
+# Graficación del primer ARX
 
 {
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -979,9 +977,7 @@ rm(formula,
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]")
   dev.off()
-}
-
-{
+  
   dataframe_trabajo$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
                                                     format = "%Y-%m-%d %H:%M:%OS"))
   
@@ -1018,8 +1014,7 @@ rm(formula,
 # Limpiado de variables
 
 rm(temperatura_interior_med, temperatura_interior_pred,
-   x,
-   matriz_resultados)
+   x, matriz_resultados)
 
 #===============================================================================
 
@@ -1185,9 +1180,7 @@ while (y==1) {
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]")
   dev.off()
-}
 
-{
   dataframe_trabajo$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
                                                     format = "%Y-%m-%d %H:%M:%OS"))
   
@@ -1222,7 +1215,7 @@ while (y==1) {
 #===============================================================================
 
 #===============================================================================
-# Segundo(s) ARX: instante de tiempo actual y se va añadiendo cada vez un
+# Tercer(os) ARX: instante de tiempo actual y se va añadiendo cada vez un
 # instante de tiempo pasado sin forzar al intercept a ser 0
 #-------------------------------------------------------------------------------
 
@@ -1310,16 +1303,8 @@ for (j in 0:obs_anteriores){
   # significativo, se consideran como significativos lo instantes del quinto al
   # actual para la radiacion solar
 
-El problema esta al quitar temperatura_exterior_3 (j=3, i=18)
-
 obs_anteriores<-6
 dejadas<-c()
-
-formula<-"temperatura_interior ~  ocupantes_conteo_robus3 + temperatura_exterior + energia_agua_refrigerada + radiacion_global_fachada + temperatura_interior_1 + ocupantes_conteo_robus3_1 + temperatura_exterior_1 + energia_agua_refrigerada_1 + radiacion_global_fachada_1 + temperatura_interior_2 + ocupantes_conteo_robus3_2 + temperatura_exterior_2 + energia_agua_refrigerada_2 + radiacion_global_fachada_2 + temperatura_interior_3 + ocupantes_conteo_robus3_3 + temperatura_exterior_3 + energia_agua_refrigerada_3 + radiacion_global_fachada_3 + temperatura_interior_4 + ocupantes_conteo_robus3_4 + temperatura_exterior_4 + energia_agua_refrigerada_4 + radiacion_global_fachada_4 + temperatura_interior_5 + ocupantes_conteo_robus3_5 + temperatura_exterior_5 + energia_agua_refrigerada_5 + radiacion_global_fachada_5 + temperatura_interior_6 + ocupantes_conteo_robus3_6 + temperatura_exterior_6 + energia_agua_refrigerada_6 + radiacion_global_fachada_6"
-attach(dataframe_trabajo)
-arx<-lm(formula)
-detach(dataframe_trabajo)
-a<-summary(arx)
 
 for (j in obs_anteriores:0){
   exit=0
@@ -1340,10 +1325,12 @@ for (j in obs_anteriores:0){
     for (i in 1:length(names(arx$coefficients))){
       exit<-0
       final<-nchar(names(arx$coefficients)[i])
-      if (substring(names(arx$coefficients[i]),final,final)==j){
+      if (substring(names(arx$coefficients[i]),final-1,final) == paste("_", 
+                                                                       j, 
+                                                                       sep="")){
         if (a[["coefficients"]][i,4]>0.05){
           for (k in 1:length(dejadas)){
-            if (substring(names(arx$coefficients[i]),1,final-2)==dejadas[k]){
+            if (substring(names(arx$coefficients[i]),1,final-2) == dejadas[k]){
               exit<-1
             }
           }
@@ -1357,18 +1344,21 @@ for (j in obs_anteriores:0){
       }
     }
     
-  }else{
+  }else if (j==0){
     for (i in 1:length(names(arx$coefficients))){
-      exit<-0
-      if (a[["coefficients"]][i,4]>0.05){
-        for (k in 1:length(dejadas)){
-          if (names(arx$coefficients[i])==dejadas[k]){
-            exit<-1
+      final<-nchar(names(arx$coefficients)[i])
+      if (substring(names(arx$coefficients[i]),final-1,final-1) != "_"){
+        exit<-0
+        if (a[["coefficients"]][i,4]>0.05){
+          for (k in 1:length(dejadas)){
+            if (names(arx$coefficients[i])==dejadas[k]){
+              exit<-1
+            }
           }
-        }
-        if (exit!=1){
-          quitar<-names(arx$coefficients[i])
-          formula<-gsub(quitar, " ", formula)
+          if (exit!=1){
+            quitar<-names(arx$coefficients[i])
+            formula<-gsub(quitar, " ", formula)
+          }
         }
       }
     }
@@ -1387,57 +1377,6 @@ for (j in obs_anteriores:0){
   a<-summary(arx)
 }
 
-
-
-
-formula<-"temperatura_interior ~  ocupantes_conteo_robus3 + temperatura_exterior + energia_agua_refrigerada + radiacion_global_fachada + temperatura_interior_1 + ocupantes_conteo_robus3_1 + temperatura_exterior_1 + energia_agua_refrigerada_1 + radiacion_global_fachada_1 + temperatura_interior_2 + ocupantes_conteo_robus3_2 + temperatura_exterior_2 + energia_agua_refrigerada_2 + radiacion_global_fachada_2 + temperatura_interior_3 + ocupantes_conteo_robus3_3 + temperatura_exterior_3 + energia_agua_refrigerada_3 + radiacion_global_fachada_3 + temperatura_interior_4 + ocupantes_conteo_robus3_4 + temperatura_exterior_4 + energia_agua_refrigerada_4 + radiacion_global_fachada_4 + temperatura_interior_5 + ocupantes_conteo_robus3_5 + energia_agua_refrigerada_5 + temperatura_interior_6 + ocupantes_conteo_robus3_6 + energia_agua_refrigerada_6"
-
-attach(dataframe_trabajo)
-arx<-lm(formula)
-detach(dataframe_trabajo)
-a<-summary(arx)
-# Me fijo en _4
-
-formula<-"temperatura_interior ~  ocupantes_conteo_robus3 + temperatura_exterior + energia_agua_refrigerada + radiacion_global_fachada + temperatura_interior_1 + ocupantes_conteo_robus3_1 + temperatura_exterior_1 + energia_agua_refrigerada_1 + radiacion_global_fachada_1 + temperatura_interior_2 + ocupantes_conteo_robus3_2 + temperatura_exterior_2 + energia_agua_refrigerada_2 + radiacion_global_fachada_2 + temperatura_interior_3 + ocupantes_conteo_robus3_3 + temperatura_exterior_3 + energia_agua_refrigerada_3 + radiacion_global_fachada_3 + temperatura_interior_4 + ocupantes_conteo_robus3_4 + energia_agua_refrigerada_4 + radiacion_global_fachada_4 + temperatura_interior_5 + ocupantes_conteo_robus3_5 + energia_agua_refrigerada_5 + temperatura_interior_6 + ocupantes_conteo_robus3_6 + energia_agua_refrigerada_6"
-
-attach(dataframe_trabajo)
-arx<-lm(formula)
-detach(dataframe_trabajo)
-a<-summary(arx)
-# Me fijo en _3
-
-formula<-"temperatura_interior ~  ocupantes_conteo_robus3 + temperatura_exterior + energia_agua_refrigerada + radiacion_global_fachada + temperatura_interior_1 + ocupantes_conteo_robus3_1 + temperatura_exterior_1 + energia_agua_refrigerada_1 + radiacion_global_fachada_1 + temperatura_interior_2 + ocupantes_conteo_robus3_2 + temperatura_exterior_2 + energia_agua_refrigerada_2 + radiacion_global_fachada_2 + temperatura_interior_3 + ocupantes_conteo_robus3_3 + energia_agua_refrigerada_3 + radiacion_global_fachada_3 + temperatura_interior_4 + ocupantes_conteo_robus3_4 + energia_agua_refrigerada_4 + radiacion_global_fachada_4 + temperatura_interior_5 + ocupantes_conteo_robus3_5 + energia_agua_refrigerada_5 + temperatura_interior_6 + ocupantes_conteo_robus3_6 + energia_agua_refrigerada_6"
-
-attach(dataframe_trabajo)
-arx<-lm(formula)
-detach(dataframe_trabajo)
-a<-summary(arx)
-# Me fijo en _2
-
-formula<-"temperatura_interior ~  ocupantes_conteo_robus3 + temperatura_exterior + energia_agua_refrigerada + radiacion_global_fachada + temperatura_interior_1 + ocupantes_conteo_robus3_1 + temperatura_exterior_1 + energia_agua_refrigerada_1 + radiacion_global_fachada_1 + temperatura_interior_2 + ocupantes_conteo_robus3_2 + energia_agua_refrigerada_2 + radiacion_global_fachada_2 + temperatura_interior_3 + ocupantes_conteo_robus3_3 + energia_agua_refrigerada_3 + radiacion_global_fachada_3 + temperatura_interior_4 + ocupantes_conteo_robus3_4 + energia_agua_refrigerada_4 + radiacion_global_fachada_4 + temperatura_interior_5 + ocupantes_conteo_robus3_5 + energia_agua_refrigerada_5 + temperatura_interior_6 + ocupantes_conteo_robus3_6 + energia_agua_refrigerada_6"
-
-attach(dataframe_trabajo)
-arx<-lm(formula)
-detach(dataframe_trabajo)
-a<-summary(arx)
-# Me fijo en _1
-
-formula<-"temperatura_interior ~  ocupantes_conteo_robus3 + temperatura_exterior + energia_agua_refrigerada + radiacion_global_fachada + temperatura_interior_1 + ocupantes_conteo_robus3_1 + energia_agua_refrigerada_1 + radiacion_global_fachada_1 + temperatura_interior_2 + ocupantes_conteo_robus3_2 + energia_agua_refrigerada_2 + radiacion_global_fachada_2 + temperatura_interior_3 + ocupantes_conteo_robus3_3 + energia_agua_refrigerada_3 + radiacion_global_fachada_3 + temperatura_interior_4 + ocupantes_conteo_robus3_4 + energia_agua_refrigerada_4 + radiacion_global_fachada_4 + temperatura_interior_5 + ocupantes_conteo_robus3_5 + energia_agua_refrigerada_5 + temperatura_interior_6 + ocupantes_conteo_robus3_6 + energia_agua_refrigerada_6"
-
-attach(dataframe_trabajo)
-arx<-lm(formula)
-detach(dataframe_trabajo)
-a<-summary(arx)
-# Me fijo en 
-
-# Definitivo
-formula<-"temperatura_interior ~  ocupantes_conteo_robus3 + energia_agua_refrigerada + radiacion_global_fachada + temperatura_interior_1 + ocupantes_conteo_robus3_1 + energia_agua_refrigerada_1 + radiacion_global_fachada_1 + temperatura_interior_2 + ocupantes_conteo_robus3_2 + energia_agua_refrigerada_2 + radiacion_global_fachada_2 + temperatura_interior_3 + ocupantes_conteo_robus3_3 + energia_agua_refrigerada_3 + radiacion_global_fachada_3 + temperatura_interior_4 + ocupantes_conteo_robus3_4 + energia_agua_refrigerada_4 + radiacion_global_fachada_4 + temperatura_interior_5 + ocupantes_conteo_robus3_5 + energia_agua_refrigerada_5 + temperatura_interior_6 + ocupantes_conteo_robus3_6 + energia_agua_refrigerada_6"
-
-attach(dataframe_trabajo)
-arx<-lm(formula)
-detach(dataframe_trabajo)
-a<-summary(arx)
-
 #-------------------------------------------------------------------------------
 
 # Graficación del tercer ARX
@@ -1453,9 +1392,7 @@ a<-summary(arx)
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]")
   dev.off()
-}
 
-{
   dataframe_trabajo$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
                                                     format = "%Y-%m-%d %H:%M:%OS"))
   
@@ -1486,5 +1423,17 @@ a<-summary(arx)
          cex=1.5)
   dev.off() 
 }
+
+#-------------------------------------------------------------------------------
+
+# Limpiado de variables
+
+rm(a, arx,
+   dataframe_15, dataframe_30, dataframe_60,
+   dataframe_resultados, dataframe_trabajo,
+   dejadas, exit, final, formula, i, j, k, minimo, nombre_columna, nombre_var,
+   nombres_filas, numero_filas, obs_anteriores, quitar, regresion_output,
+   temperatura_interior_med, temperatura_interior_pred,
+   variables_regresion_input, wd, x, y)
 
 #===============================================================================
