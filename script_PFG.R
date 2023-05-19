@@ -1171,7 +1171,7 @@ rm(temperatura_interior_med, temperatura_interior_pred,
   # actual para la radiacion solar
 
 {
-  obs_anteriores<-1
+  obs_anteriores<-0
   dejadas<-c()
   
   formula<-paste(regresion_output, " ~ 0 +", sep="")
@@ -1182,15 +1182,17 @@ rm(temperatura_interior_med, temperatura_interior_pred,
       formula<-paste(formula, " +", sep="") 
   }
   
-  for (i in 1:obs_anteriores) {
-    nombre_var<-paste(regresion_output, "_", i, sep="")
-    formula<-paste(formula, " + ", nombre_var, sep="") 
-    
-    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
-    
-    for (j in 1:length(nombre_var)) {
-      formula<-paste(formula, " + ",nombre_var[j], sep="")
-    }
+  if (obs_anteriores>0){
+    for (i in 1:obs_anteriores) {
+      nombre_var<-paste(regresion_output, "_", i, sep="")
+      formula<-paste(formula, " + ", nombre_var, sep="") 
+      
+      nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+      
+      for (j in 1:length(nombre_var)) {
+        formula<-paste(formula, " + ",nombre_var[j], sep="")
+      }
+    } 
   }
   
   attach(dataframe_trabajo_norm_train)
@@ -1263,9 +1265,9 @@ rm(temperatura_interior_med, temperatura_interior_pred,
       final<-final-1
     }
     
-    attach(dataframe_trabajo)
+    attach(dataframe_trabajo_norm_train)
     arx<-lm(formula)
-    detach(dataframe_trabajo)
+    detach(dataframe_trabajo_norm_train)
     a<-summary(arx)
     
     temperatura_interior_pred<-predict(arx, dataframe_trabajo_norm_test)
@@ -1647,6 +1649,6 @@ rm(a, arx,
    variables_regresion_input, wd, x,
    fraccion_train, longitud, maximo, minimo,
    dataframe_trabajo_norm, dataframe_trabajo_norm_test, 
-   dataframe_trabajo_norm_train)
+   dataframe_trabajo_norm_train, grados_margen)
 
 #===============================================================================
