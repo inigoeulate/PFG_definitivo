@@ -473,7 +473,8 @@ rm(acimut,altura, angulo_horario,B,cenit,cociente,declinacion,diferencia,i,
     }
   }
   
-  radiacion_directa_horizontal<-dataset$radiacion_solar_global_horizontal-radiacion_difusa
+  radiacion_directa_horizontal<-dataset$radiacion_solar_global_horizontal-
+    radiacion_difusa
 }
 
 #-------------------------------------------------------------------------------
@@ -497,7 +498,8 @@ acimut_aparente<-dataset$acimut-acimut_plano
 # Conversión de la radiación solar sobre plano perpendicular a la incidencia
 # solar a radiación solar incidente sobre fachada
 
-radiacion_directa_fachada<-radiacion_directa_perpendicular*cos(dataset$altura*pi/180)*cos(acimut_aparente*pi/180)
+radiacion_directa_fachada<-radiacion_directa_perpendicular*
+  cos(dataset$altura*pi/180)*cos(acimut_aparente*pi/180)
 
 # Verificación:
   # si el sol ve la fachada (azimuth aparente = [-90º,90º]) -> radiación directa
@@ -670,7 +672,8 @@ dia13<-dataset[comienzo:final,]
        ylim=c(min(dia10$radiacion_solar_global_horizontal),
               max(dia10$radiacion_solar_global_horizontal)))
   points(dia13$hora_solar, dia13$radiacion_difusa, col="blue", cex=1.5)
-  points(dia13$hora_solar, dia13$radiacion_directa_fachada, col="yellow", cex=1.5)
+  points(dia13$hora_solar, dia13$radiacion_directa_fachada, col="yellow", 
+         cex=1.5)
   legend(x="topleft", legend=c("Radiación solar global horizontal", 
                                "Radiación difusa",
                                "Radiación directa s/ fachada"),
@@ -812,10 +815,12 @@ rm(i,j,k,
 
 # Nos centramos en el modelo con sampleo de 60 minutos
 
-sampleo<-60
-
-nombre_dataframe<-paste("dataframe", sampleo, sep="_")
-dataframe_trabajo<-get(nombre_dataframe)
+{
+  sampleo<-60
+  
+  nombre_dataframe<-paste("dataframe", sampleo, sep="_")
+  dataframe_trabajo<-get(nombre_dataframe) 
+}
 
 #-------------------------------------------------------------------------------
 
@@ -867,28 +872,32 @@ dataframe_trabajo<-get(nombre_dataframe)
 
 # Creación de las variables temperatura interior medida y predicha
 
-x<-obs_anteriores+1
-
-temperatura_interior_pred<-predict(arx)
-temperatura_interior_med<-
-  dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+{
+  x<-obs_anteriores+1
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-
+    dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+}
 
 #-------------------------------------------------------------------------------
 
 # Creación de la matriz de resultados e introducción de los resultados del
 # primer modelo ARX
 
-numero_filas=length(names(arx$coefficients))+2
-
-nombres_filas<-c(names(arx$coefficients), "R2", "MAE")
-
-matriz_resultados<-matrix(nrow=numero_filas,
-                          ncol=length(names(arx$coefficients)))
-rownames(matriz_resultados)<-nombres_filas
-matriz_resultados[,1]<-c(a[["coefficients"]][,4],
-                         summary(arx)$r.squared,
-                         mae(temperatura_interior_med,
-                             temperatura_interior_pred))
+{
+  numero_filas=length(names(arx$coefficients))+2
+  
+  nombres_filas<-c(names(arx$coefficients), "R2", "MAE")
+  
+  matriz_resultados<-matrix(nrow=numero_filas,
+                            ncol=length(names(arx$coefficients)))
+  rownames(matriz_resultados)<-nombres_filas
+  matriz_resultados[,1]<-c(a[["coefficients"]][,4],
+                           summary(arx)$r.squared,
+                           mae(temperatura_interior_med,
+                               temperatura_interior_pred))
+}
 
 #-------------------------------------------------------------------------------
 
@@ -967,25 +976,37 @@ rm(formula,
 # Graficación del primer ARX
 
 {
+  grados_margen<-0.25
+  
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
-        ylab="Temperatura interior predicha [ºC]")
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(min(temperatura_interior_med-grados_margen),
+               max(temperatura_interior_med+grados_margen)),
+        ylim=c(min(temperatura_interior_pred-grados_margen),
+               max(temperatura_interior_pred+grados_margen)))
   
   png(paste(getwd(),"/plots/temp_interior_med_vs_pred_1.png",sep=""), width=800, 
       height=800)
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
-        ylab="Temperatura interior predicha [ºC]")
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(min(temperatura_interior_med-grados_margen),
+               max(temperatura_interior_med+grados_margen)),
+        ylim=c(min(temperatura_interior_pred-grados_margen),
+               max(temperatura_interior_pred+grados_margen)))
   dev.off()
   
-  dataframe_trabajo$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
-                                                    format = "%Y-%m-%d %H:%M:%OS"))
+  dataframe_trabajo$hora_solar<-
+    as.POSIXct(strftime(dataframe_60$hora_solar, format = "%Y-%m-%d %H:%M:%OS"))
   
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
        temperatura_interior_med,
-       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=0.5)
+       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
+       ylim=c(min(temperatura_interior_med-grados_margen),
+              max(temperatura_interior_med+grados_margen)))
   points(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
-         temperatura_interior_pred, col="blue", cex=0.5)
+         temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
                                "Temperatura interior predicha [ºC]"),
          col=c("red","blue"),
@@ -998,7 +1019,9 @@ rm(formula,
       height=800)
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
        temperatura_interior_med,
-       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5)
+       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
+       ylim=c(min(temperatura_interior_med-grados_margen),
+              max(temperatura_interior_med+grados_margen)))
   points(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
          temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
@@ -1023,74 +1046,20 @@ rm(temperatura_interior_med, temperatura_interior_pred,
 # instante de tiempo pasado forzando al intercept a ser 0
 #-------------------------------------------------------------------------------
 
-dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
-rownames(dataframe_resultados)<-nombres_filas
-colnames(dataframe_resultados)<-"instante_actual"
+# Normalizado de los datos
 
-for (j in 0:obs_anteriores){
-  formula<-paste(regresion_output, " ~ 0 +", sep="")
+{
+  dataframe_trabajo_norm<-na.omit(dataframe_trabajo)
   
-  for (i in 1:length(variables_regresion_input)){
-    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
-    if (i<length(variables_regresion_input)){
-      formula<-paste(formula, " +", sep="")
-    }
-  }
-  
-  if (j>0){
-    for (i in 1:j) {
-      nombre_var<-paste(regresion_output, "_", i, sep="")
-      formula<-paste(formula, " + ", nombre_var, sep="") 
-      
-      nombre_var<-paste(variables_regresion_input, "_", i, sep="")
-      
-      for (k in 1:length(nombre_var)) {
-        formula<-paste(formula, " + ",nombre_var[k], sep="")
-      }
-    }
-  }
-  
-  attach(dataframe_trabajo)
-  arx<-lm(formula)
-  detach(dataframe_trabajo)
-  a<-summary(arx)
-  
-  x<-j+1
-  
-  temperatura_interior_pred<-predict(arx)
-  temperatura_interior_med<-dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
-  
-  if (j==0){
-    for (i in 1:nrow(dataframe_resultados)){
-      for (k in 1:length(names(arx$coefficients))){
-        if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
-          dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
-        }
-      }
-      if (rownames(dataframe_resultados)[i] == "R2"){
-        dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
-      }
-      if (rownames(dataframe_resultados)[i] == "MAE"){
-        dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
-                                                     temperatura_interior_pred)
-      }
-    }
-  } else {
-    nombre_columna<-paste("instante_pasado", j, sep="_")
-    dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
-    colnames(dataframe_resultados)[j+1]<-nombre_columna
-    for (i in 1:nrow(dataframe_resultados)){
-      for (k in 1:length(names(arx$coefficients))){
-        if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
-          dataframe_resultados[i,j+1]<-arx$coefficients[k]
-        }
-      }
-      if (rownames(dataframe_resultados)[i] == "R2"){
-        dataframe_resultados[i,j+1]<-summary(arx)$r.squared
-      }
-      if (rownames(dataframe_resultados)[i] == "MAE"){
-        dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
-                                         temperatura_interior_pred)
+  for (j in 1:length(dataframe_trabajo_norm)){
+    if (names(dataframe_trabajo_norm[j]) != "marca_tiempo" & 
+        names(dataframe_trabajo_norm[j]) != "hora_solar" &
+        grepl("temperatura",names(dataframe_trabajo_norm[j])) != TRUE){
+      maximo<-max(dataframe_trabajo_norm[, j])
+      minimo<-min(dataframe_trabajo_norm[, j])
+      for (i in 1:nrow(dataframe_trabajo_norm)){
+        dataframe_trabajo_norm[i, j]<-(dataframe_trabajo_norm[i, j]-minimo)/
+          (maximo-minimo)
       }
     }
   }
@@ -1098,71 +1067,231 @@ for (j in 0:obs_anteriores){
 
 #-------------------------------------------------------------------------------
 
-# A partir del ARX con el instante de tiempo actual (se elige porque tiene un
-# R2>0,95), se analiza la significatividad de las variables
+# Separación del dataframe en training y testing
 
-obs_anteriores<-0
-
-formula<-paste(regresion_output, " ~ 0 +", sep="")
-
-for (i in 1:length(variables_regresion_input)){
-  formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
-  if (i<length(variables_regresion_input)){
-    formula<-paste(formula, " +", sep="")
-  }
+{
+  fraccion_train<-3/5
+  longitud<-nrow(dataframe_trabajo_norm)*fraccion_train
+  dataframe_trabajo_norm_train<-dataframe_trabajo_norm[1:longitud,]
+  dataframe_trabajo_norm_test<-
+    dataframe_trabajo_norm[(longitud+1):nrow(dataframe_trabajo_norm),] 
 }
 
-attach(dataframe_trabajo)
-arx<-lm(formula)
-detach(dataframe_trabajo)
-a<-summary(arx)
+#-------------------------------------------------------------------------------
 
-y<-1
-while (y==1) {
-  minimo<-0
-  for (i in 1:length(names(arx$coefficients))){
-    if (a[["coefficients"]][i,4]>minimo & a[["coefficients"]][i,4]>0.05){
-      minimo<-a[["coefficients"]][i,4]
-      quitar<-paste(names(arx$coefficients)[i], " ", sep="")
-    }
-  }
-  if (minimo==0){
-    quitar=""
-    y=0
-  }
-  
-  formula<-gsub(quitar, "", formula)
-  
-  attach (dataframe_trabajo)
-  arx<-lm(formula)
-  detach(dataframe_trabajo)
-  a<-summary(arx)
-  
-  x<-obs_anteriores+1
-  
-  temperatura_interior_pred<-predict(arx)
-  temperatura_interior_med<-
-    dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
-  
-  dataframe_resultados$mas<-NA
-  
-  for (i in 1:nrow(dataframe_resultados)){
-    for (k in 1:length(arx$coefficients)){
-      if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[k]){
-        dataframe_resultados$mas[i]<-arx$coefficients[k]
+# Creación del dataframe que contendrá los resultados
+
+{
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
+  rownames(dataframe_resultados)<-nombres_filas
+  colnames(dataframe_resultados)<-"instante_actual" 
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX con todos los pasos de tiempo anteriores
+
+{
+  for (j in 0:obs_anteriores){
+    formula<-paste(regresion_output, " ~ 0 +", sep="")
+    
+    for (i in 1:length(variables_regresion_input)){
+      formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+      if (i<length(variables_regresion_input)){
+        formula<-paste(formula, " +", sep="")
       }
     }
-    if (rownames(dataframe_resultados)[i] == "R2"){
-      dataframe_resultados$mas[i]<-summary(arx)$r.squared
+    
+    if (j>0){
+      for (i in 1:j) {
+        nombre_var<-paste(regresion_output, "_", i, sep="")
+        formula<-paste(formula, " + ", nombre_var, sep="") 
+        
+        nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+        
+        for (k in 1:length(nombre_var)) {
+          formula<-paste(formula, " + ",nombre_var[k], sep="")
+        }
+      }
     }
-    if (rownames(dataframe_resultados)[i] == "MAE"){
-      dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
-                                       temperatura_interior_pred)
+    
+    attach(dataframe_trabajo_norm_train)
+    arx<-lm(formula)
+    detach(dataframe_trabajo_norm_train)
+    a<-summary(arx)
+    
+    temperatura_interior_pred<-predict(arx, dataframe_trabajo_norm_test)
+    temperatura_interior_med<-
+      na.omit(dataframe_trabajo)$temperatura_interior[(longitud+1):nrow(dataframe_trabajo_norm)]
+    
+    if (j==0){
+      for (i in 1:nrow(dataframe_resultados)){
+        for (k in 1:length(names(arx$coefficients))){
+          if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+            dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
+          }
+        }
+        if (rownames(dataframe_resultados)[i] == "R2"){
+          dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+        }
+        if (rownames(dataframe_resultados)[i] == "MAE"){
+          dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                       temperatura_interior_pred)
+        }
+      }
+    } else {
+      nombre_columna<-paste("instante_pasado", j, sep="_")
+      dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
+      colnames(dataframe_resultados)[j+1]<-nombre_columna
+      for (i in 1:nrow(dataframe_resultados)){
+        for (k in 1:length(names(arx$coefficients))){
+          if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+            dataframe_resultados[i,j+1]<-arx$coefficients[k]
+          }
+        }
+        if (rownames(dataframe_resultados)[i] == "R2"){
+          dataframe_resultados[i,j+1]<-summary(arx)$r.squared
+        }
+        if (rownames(dataframe_resultados)[i] == "MAE"){
+          dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
+                                           temperatura_interior_pred)
+        }
+      }
+    }
+  } 
+}
+
+#-------------------------------------------------------------------------------
+
+# A partir del ARX con el instante de tiempo actual y un instante de tiempo
+# pasado (se elige porque tiene un R2>0,98), se analiza la significatividad de
+# las variables  desde las mas antiguas
+  # Ejemplo: si en el instante anterior de la radiación solar es significativa,
+  # se consideran como significativos lo instantes del quinto al
+  # actual para la radiacion solar
+
+{
+  obs_anteriores<-1
+  dejadas<-c()
+  
+  formula<-paste(regresion_output, " ~ 0 +", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+  
+  for (i in 1:obs_anteriores) {
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    formula<-paste(formula, " + ", nombre_var, sep="") 
+    
+    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+    
+    for (j in 1:length(nombre_var)) {
+      formula<-paste(formula, " + ",nombre_var[j], sep="")
     }
   }
-  j<-which(names(dataframe_resultados) == "mas")
-  nombre_columna<-paste("iteracion", "_", j, sep="")
-  colnames(dataframe_resultados)[j]<-nombre_columna
+  
+  attach(dataframe_trabajo_norm_train)
+  arx<-lm(formula)
+  detach(dataframe_trabajo_norm_train)
+  a<-summary(arx)
+  
+  for (j in obs_anteriores:0){
+    exit=0
+    if (j==obs_anteriores){
+      for (i in 1:length(names(arx$coefficients))){
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final,final)==obs_anteriores){
+          if (a[["coefficients"]][i,4]>0.05){
+            quitar<-names(arx$coefficients[i])
+            formula<-gsub(quitar, "", formula)
+          }else{
+            dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
+          }
+        }
+      }
+      
+    }else if (j<obs_anteriores & j>0){
+      for (i in 1:length(names(arx$coefficients))){
+        exit<-0
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final-1,final) == paste("_", 
+                                                                         j, 
+                                                                         sep="")){
+          if (a[["coefficients"]][i,4]>0.05){
+            for (k in 1:length(dejadas)){
+              if (substring(names(arx$coefficients[i]),1,final-2) == dejadas[k]){
+                exit<-1
+              }
+            }
+            if (exit!=1){
+              quitar<-names(arx$coefficients[i])
+              formula<-gsub(quitar, "", formula)
+            }
+          }else{
+            dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
+          }
+        }
+      }
+      
+    }else if (j==0){
+      for (i in 1:length(names(arx$coefficients))){
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final-1,final-1) != "_"){
+          exit<-0
+          if (a[["coefficients"]][i,4]>0.05){
+            for (k in 1:length(dejadas)){
+              if (names(arx$coefficients[i])==dejadas[k]){
+                exit<-1
+              }
+            }
+            if (exit!=1){
+              quitar<-names(arx$coefficients[i])
+              formula<-gsub(quitar, " ", formula)
+            }
+          }
+        }
+      }
+    }
+    
+    final<-nchar(formula)
+    while (substring(formula, final, final) == " " || 
+           substring(formula, final, final) == "+"){
+      formula<-substring(formula, 1, final-1)
+      final<-final-1
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    temperatura_interior_pred<-predict(arx, dataframe_trabajo_norm_test)
+    temperatura_interior_med<-
+      na.omit(dataframe_trabajo)$temperatura_interior[(longitud+1):nrow(dataframe_trabajo_norm)]
+    
+    dataframe_resultados$mas<-NA
+    
+    for (i in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(arx$coefficients)){
+        if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[k]){
+          dataframe_resultados$mas[i]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(dataframe_resultados)[i] == "R2"){
+        dataframe_resultados$mas[i]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[i] == "MAE"){
+        dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
+                                         temperatura_interior_pred)
+      }
+    }
+    j<-which(names(dataframe_resultados) == "mas")
+    nombre_columna<-paste("iteracion", "_", j, sep="")
+    colnames(dataframe_resultados)[j]<-nombre_columna
+  } 
 }
 
 #-------------------------------------------------------------------------------
@@ -1172,23 +1301,35 @@ while (y==1) {
 {
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
-        ylab="Temperatura interior predicha [ºC]")
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(min(temperatura_interior_med-grados_margen),
+               max(temperatura_interior_med+grados_margen)),
+        ylim=c(min(temperatura_interior_pred-grados_margen),
+               max(temperatura_interior_pred+grados_margen)))
   
   png(paste(getwd(),"/plots/temp_interior_med_vs_pred_2.png",sep=""), width=800, 
       height=800)
+  
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
-        ylab="Temperatura interior predicha [ºC]")
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(min(temperatura_interior_med-grados_margen),
+               max(temperatura_interior_med+grados_margen)),
+        ylim=c(min(temperatura_interior_pred-grados_margen),
+               max(temperatura_interior_pred+grados_margen)))
   dev.off()
-
-  dataframe_trabajo$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
-                                                    format = "%Y-%m-%d %H:%M:%OS"))
   
-  plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
+  dataframe_trabajo_norm$hora_solar<-
+    as.POSIXct(strftime(dataframe_trabajo_norm$hora_solar,
+                        format = "%Y-%m-%d %H:%M:%OS"))
+  
+  plot(dataframe_trabajo_norm$hora_solar[(longitud+1):nrow(dataframe_trabajo_norm)],
        temperatura_interior_med,
-       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=0.5)
-  points(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
-         temperatura_interior_pred, col="blue", cex=0.5)
+       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
+       ylim=c(min(temperatura_interior_med-grados_margen),
+              max(temperatura_interior_med+grados_margen)))
+  points(dataframe_trabajo_norm$hora_solar[(longitud+1):nrow(dataframe_trabajo_norm)],
+         temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
                                "Temperatura interior predicha [ºC]"),
          col=c("red","blue"),
@@ -1199,10 +1340,12 @@ while (y==1) {
             sep=""), 
       width=800, 
       height=800)
-  plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
+  plot(dataframe_trabajo_norm$hora_solar[(longitud+1):nrow(dataframe_trabajo_norm)],
        temperatura_interior_med,
-       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5)
-  points(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
+       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
+       ylim=c(min(temperatura_interior_med-grados_margen),
+              max(temperatura_interior_med+grados_margen)))
+  points(dataframe_trabajo_norm$hora_solar[(longitud+1):nrow(dataframe_trabajo_norm)],
          temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
                                "Temperatura interior predicha [ºC]"),
@@ -1219,79 +1362,82 @@ while (y==1) {
 # instante de tiempo pasado sin forzar al intercept a ser 0
 #-------------------------------------------------------------------------------
 
-obs_anteriores<-6
-
-dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
-rownames(dataframe_resultados)<-nombres_filas
-colnames(dataframe_resultados)<-"instante_actual"
-
-for (j in 0:obs_anteriores){
-  formula<-paste(regresion_output, " ~ ", sep="")
+{
+  obs_anteriores<-6
   
-  for (i in 1:length(variables_regresion_input)){
-    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
-    if (i<length(variables_regresion_input)){
-      formula<-paste(formula, " +", sep="")
-    }
-  }
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  rownames(dataframe_resultados)<-c("(Intercept)",nombres_filas)
+  colnames(dataframe_resultados)<-"instante_actual"
   
-  if (j>0){
-    for (i in 1:j) {
-      nombre_var<-paste(regresion_output, "_", i, sep="")
-      formula<-paste(formula, " + ", nombre_var, sep="") 
-      
-      nombre_var<-paste(variables_regresion_input, "_", i, sep="")
-      
-      for (k in 1:length(nombre_var)) {
-        formula<-paste(formula, " + ",nombre_var[k], sep="")
+  for (j in 0:obs_anteriores){
+    formula<-paste(regresion_output, " ~ ", sep="")
+    
+    for (i in 1:length(variables_regresion_input)){
+      formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+      if (i<length(variables_regresion_input)){
+        formula<-paste(formula, " +", sep="")
       }
     }
-  }
-  
-  attach(dataframe_trabajo)
-  arx<-lm(formula)
-  detach(dataframe_trabajo)
-  a<-summary(arx)
-  
-  x<-j+1
-  
-  temperatura_interior_pred<-predict(arx)
-  temperatura_interior_med<-dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
-  
-  if (j==0){
-    for (i in 1:nrow(dataframe_resultados)){
-      for (k in 1:length(names(arx$coefficients))){
-        if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
-          dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
+    
+    if (j>0){
+      for (i in 1:j) {
+        nombre_var<-paste(regresion_output, "_", i, sep="")
+        formula<-paste(formula, " + ", nombre_var, sep="") 
+        
+        nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+        
+        for (k in 1:length(nombre_var)) {
+          formula<-paste(formula, " + ",nombre_var[k], sep="")
         }
       }
-      if (rownames(dataframe_resultados)[i] == "R2"){
-        dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
-      }
-      if (rownames(dataframe_resultados)[i] == "MAE"){
-        dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
-                                                     temperatura_interior_pred)
-      }
     }
-  } else {
-    nombre_columna<-paste("instante_pasado", j, sep="_")
-    dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
-    colnames(dataframe_resultados)[j+1]<-nombre_columna
-    for (i in 1:nrow(dataframe_resultados)){
-      for (k in 1:length(names(arx$coefficients))){
-        if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
-          dataframe_resultados[i,j+1]<-arx$coefficients[k]
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-j+1
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    if (j==0){
+      for (i in 1:nrow(dataframe_resultados)){
+        for (k in 1:length(names(arx$coefficients))){
+          if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+            dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
+          }
+        }
+        if (rownames(dataframe_resultados)[i] == "R2"){
+          dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+        }
+        if (rownames(dataframe_resultados)[i] == "MAE"){
+          dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                       temperatura_interior_pred)
         }
       }
-      if (rownames(dataframe_resultados)[i] == "R2"){
-        dataframe_resultados[i,j+1]<-summary(arx)$r.squared
-      }
-      if (rownames(dataframe_resultados)[i] == "MAE"){
-        dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
-                                         temperatura_interior_pred)
+    } else {
+      nombre_columna<-paste("instante_pasado", j, sep="_")
+      dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
+      colnames(dataframe_resultados)[j+1]<-nombre_columna
+      for (i in 1:nrow(dataframe_resultados)){
+        for (k in 1:length(names(arx$coefficients))){
+          if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+            dataframe_resultados[i,j+1]<-arx$coefficients[k]
+          }
+        }
+        if (rownames(dataframe_resultados)[i] == "R2"){
+          dataframe_resultados[i,j+1]<-summary(arx)$r.squared
+        }
+        if (rownames(dataframe_resultados)[i] == "MAE"){
+          dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
+                                           temperatura_interior_pred)
+        }
       }
     }
-  }
+  } 
 }
 
 #-------------------------------------------------------------------------------
@@ -1303,78 +1449,130 @@ for (j in 0:obs_anteriores){
   # significativo, se consideran como significativos lo instantes del quinto al
   # actual para la radiacion solar
 
-obs_anteriores<-6
-dejadas<-c()
-
-for (j in obs_anteriores:0){
-  exit=0
-  if (j==obs_anteriores){
-    for (i in 1:length(names(arx$coefficients))){
-      final<-nchar(names(arx$coefficients)[i])
-      if (substring(names(arx$coefficients[i]),final,final)==obs_anteriores){
-        if (a[["coefficients"]][i,4]>0.05){
-          quitar<-names(arx$coefficients[i])
-          formula<-gsub(quitar, "", formula)
-        }else{
-          dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
-        }
-      }
-    }
+{
+  obs_anteriores<-6
+  dejadas<-c()
+  
+  formula<-paste(regresion_output, " ~ ", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+  
+  for (i in 1:obs_anteriores) {
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    formula<-paste(formula, " + ", nombre_var, sep="") 
     
-  }else if (j<obs_anteriores & j>0){
-    for (i in 1:length(names(arx$coefficients))){
-      exit<-0
-      final<-nchar(names(arx$coefficients)[i])
-      if (substring(names(arx$coefficients[i]),final-1,final) == paste("_", 
-                                                                       j, 
-                                                                       sep="")){
-        if (a[["coefficients"]][i,4]>0.05){
-          for (k in 1:length(dejadas)){
-            if (substring(names(arx$coefficients[i]),1,final-2) == dejadas[k]){
-              exit<-1
-            }
-          }
-          if (exit!=1){
+    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+    
+    for (j in 1:length(nombre_var)) {
+      formula<-paste(formula, " + ",nombre_var[j], sep="")
+    }
+  }
+  
+  attach(dataframe_trabajo_norm_train)
+  arx<-lm(formula)
+  detach(dataframe_trabajo_norm_train)
+  a<-summary(arx)
+  
+  for (j in obs_anteriores:0){
+    exit=0
+    if (j==obs_anteriores){
+      for (i in 1:length(names(arx$coefficients))){
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final,final)==obs_anteriores){
+          if (a[["coefficients"]][i,4]>0.05){
             quitar<-names(arx$coefficients[i])
             formula<-gsub(quitar, "", formula)
+          }else{
+            dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
           }
-        }else{
-          dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
+        }
+      }
+      
+    }else if (j<obs_anteriores & j>0){
+      for (i in 1:length(names(arx$coefficients))){
+        exit<-0
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final-1,final) == paste("_", 
+                                                                         j, 
+                                                                         sep="")){
+          if (a[["coefficients"]][i,4]>0.05){
+            for (k in 1:length(dejadas)){
+              if (substring(names(arx$coefficients[i]),1,final-2) == dejadas[k]){
+                exit<-1
+              }
+            }
+            if (exit!=1){
+              quitar<-names(arx$coefficients[i])
+              formula<-gsub(quitar, "", formula)
+            }
+          }else{
+            dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
+          }
+        }
+      }
+      
+    }else if (j==0){
+      for (i in 1:length(names(arx$coefficients))){
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final-1,final-1) != "_"){
+          exit<-0
+          if (a[["coefficients"]][i,4]>0.05){
+            for (k in 1:length(dejadas)){
+              if (names(arx$coefficients[i])==dejadas[k]){
+                exit<-1
+              }
+            }
+            if (exit!=1){
+              quitar<-names(arx$coefficients[i])
+              formula<-gsub(quitar, " ", formula)
+            }
+          }
         }
       }
     }
     
-  }else if (j==0){
-    for (i in 1:length(names(arx$coefficients))){
-      final<-nchar(names(arx$coefficients)[i])
-      if (substring(names(arx$coefficients[i]),final-1,final-1) != "_"){
-        exit<-0
-        if (a[["coefficients"]][i,4]>0.05){
-          for (k in 1:length(dejadas)){
-            if (names(arx$coefficients[i])==dejadas[k]){
-              exit<-1
-            }
-          }
-          if (exit!=1){
-            quitar<-names(arx$coefficients[i])
-            formula<-gsub(quitar, " ", formula)
-          }
+    final<-nchar(formula)
+    while (substring(formula, final, final) == " " || 
+           substring(formula, final, final) == "+"){
+      formula<-substring(formula, 1, final-1)
+      final<-final-1
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-obs_anteriores+1
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    dataframe_resultados$mas<-NA
+    
+    for (i in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(arx$coefficients)){
+        if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[k]){
+          dataframe_resultados$mas[i]<-arx$coefficients[k]
         }
       }
+      if (rownames(dataframe_resultados)[i] == "R2"){
+        dataframe_resultados$mas[i]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[i] == "MAE"){
+        dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
+                                         temperatura_interior_pred)
+      }
     }
-  }
-  
-  final<-nchar(formula)
-  while (substring(formula, final, final) == " " || 
-         substring(formula, final, final) == "+"){
-    formula<-substring(formula, 1, final-1)
-    final<-final-1
-  }
-  
-  attach(dataframe_trabajo)
-  arx<-lm(formula)
-  detach(dataframe_trabajo)
-  a<-summary(arx)
+    j<-which(names(dataframe_resultados) == "mas")
+    nombre_columna<-paste("iteracion", "_", j, sep="")
+    colnames(dataframe_resultados)[j]<-nombre_columna
+  } 
 }
 
 #-------------------------------------------------------------------------------
@@ -1384,13 +1582,21 @@ for (j in obs_anteriores:0){
 {
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
-        ylab="Temperatura interior predicha [ºC]")
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(min(temperatura_interior_med-grados_margen),
+               max(temperatura_interior_med+grados_margen)),
+        ylim=c(min(temperatura_interior_pred-grados_margen),
+               max(temperatura_interior_pred+grados_margen)))
   
   png(paste(getwd(),"/plots/temp_interior_med_vs_pred_3.png",sep=""), width=800, 
       height=800)
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
-        ylab="Temperatura interior predicha [ºC]")
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(min(temperatura_interior_med-grados_margen),
+               max(temperatura_interior_med+grados_margen)),
+        ylim=c(min(temperatura_interior_pred-grados_margen),
+               max(temperatura_interior_pred+grados_margen)))
   dev.off()
 
   dataframe_trabajo$hora_solar<-as.POSIXct(strftime(dataframe_60$hora_solar, 
@@ -1398,9 +1604,11 @@ for (j in obs_anteriores:0){
   
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
        temperatura_interior_med,
-       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=0.5)
+       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
+       ylim=c(min(temperatura_interior_med-grados_margen),
+              max(temperatura_interior_med+grados_margen)))
   points(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
-         temperatura_interior_pred, col="blue", cex=0.5)
+         temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
                                "Temperatura interior predicha [ºC]"),
          col=c("red","blue"),
@@ -1413,7 +1621,9 @@ for (j in obs_anteriores:0){
       height=800)
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
        temperatura_interior_med,
-       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5)
+       xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
+       ylim=c(min(temperatura_interior_med-grados_margen),
+              max(temperatura_interior_med+grados_margen)))
   points(dataframe_trabajo$hora_solar[x:nrow(dataframe_60)],
          temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
@@ -1431,9 +1641,12 @@ for (j in obs_anteriores:0){
 rm(a, arx,
    dataframe_15, dataframe_30, dataframe_60,
    dataframe_resultados, dataframe_trabajo,
-   dejadas, exit, final, formula, i, j, k, minimo, nombre_columna, nombre_var,
+   dejadas, exit, final, formula, i, j, k, nombre_columna, nombre_var,
    nombres_filas, numero_filas, obs_anteriores, quitar, regresion_output,
    temperatura_interior_med, temperatura_interior_pred,
-   variables_regresion_input, wd, x, y)
+   variables_regresion_input, wd, x,
+   fraccion_train, longitud, maximo, minimo,
+   dataframe_trabajo_norm, dataframe_trabajo_norm_test, 
+   dataframe_trabajo_norm_train)
 
 #===============================================================================
