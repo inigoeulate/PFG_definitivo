@@ -1,0 +1,5 @@
+"";"energia_agua_refrigerada";"temperatura_exterior";"radiacion_solar_global_horizontal";"ocupantes_conteo_robus3"
+"energia_agua_refrigerada";1;0,4167172434077;0,403397308192783;0,357967030398092
+"temperatura_exterior";0,4167172434077;1;0,673967199920206;0,51009886944331
+"radiacion_solar_global_horizontal";0,403397308192783;0,673967199920206;1;0,476552284805046
+"ocupantes_conteo_robus3";0,357967030398092;0,51009886944331;0,476552284805046;1

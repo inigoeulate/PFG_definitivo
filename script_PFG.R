@@ -123,6 +123,61 @@ write.csv2(dataset, paste(wd,"/datasets/room4_preprocesado.csv",sep=""),
 #===============================================================================
 
 #===============================================================================
+# Graficación de las señales de ocupación
+#-------------------------------------------------------------------------------
+
+# Bucle para obtener el número de fila en el que acaba el primer día y creación
+# del datafrmae con los datos de ese día
+exit<-0
+i<-1
+while (exit!=1) {
+  if (as.numeric(format(dataset[i,"marca_tiempo"],"%H"))==23 &
+      as.numeric(format(dataset[i,"marca_tiempo"],"%M"))==55) {
+    exit<-1
+  } else {
+    i<-i+1
+  }
+}
+
+subset<-dataset[1:i,]
+
+#-------------------------------------------------------------------------------
+
+# Graficación de las señales de ocupación
+
+{
+  plot(subset$marca_tiempo, subset$ocupantes_presencia, 
+       xlab="Hora", ylab="Presencia de ocupantes")
+  
+  png(paste(wd,"/plots/ocupantes_presencia_primer_dia.png",sep=""), 
+      width=800, height=800)
+  plot(subset$marca_tiempo, subset$ocupantes_presencia, 
+       xlab="Hora", ylab="Presencia de ocupantes")
+  dev.off()
+  
+  plot(subset$marca_tiempo, subset$ocupantes_conteo, 
+       xlab="Hora", ylab="Presencia de ocupantes",
+       ylim=c(min(dataset$ocupantes_conteo),
+               max(dataset$ocupantes_conteo)))
+  
+  png(paste(wd,"/plots/ocupantes_conteo_primer_dia.png",sep=""), 
+      width=800, height=800)
+  plot(subset$marca_tiempo, subset$ocupantes_conteo, 
+       xlab="Hora", ylab="Presencia de ocupantes",
+       ylim=c(min(dataset$ocupantes_conteo),
+              max(dataset$ocupantes_conteo)))
+  dev.off()
+}
+
+#-------------------------------------------------------------------------------
+
+# Limpiado de variables
+
+rm(i,exit, subset)
+
+#===============================================================================
+
+#===============================================================================
 # Mejora de la robustez de la señal de ocupación por conteo
 #-------------------------------------------------------------------------------
 
@@ -141,8 +196,9 @@ ocupantes_conteo_robus5<-rollmean(dataset$ocupantes_conteo,
 
 {
   marca_tiempo<-dataset$marca_tiempo
+  ocupantes_conteo<-dataset$ocupantes_conteo
   
-  subset<-data.frame(marca_tiempo, 
+  subset<-data.frame(marca_tiempo, ocupantes_conteo,
                      ocupantes_conteo_robus3, ocupantes_conteo_robus5)
 }
 
@@ -151,8 +207,6 @@ ocupantes_conteo_robus5<-rollmean(dataset$ocupantes_conteo,
 # Eliminación de los NAs del subset
 
 subset<-na.omit(subset)
-
-#-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 
@@ -166,14 +220,13 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
 # Se grafican para el primer día del que se tiene datos y se decide cual será la
 # empleada.
 
-  # Bucles para delimitar en que filas del dataset comienza y termina el primer
+  # Bucles para delimitar en qué filas del dataset comienza y termina el primer
   # día del que se tiene datos.
 
     # Variables auxiliares para los bucles
 {
   exit<-0
   i<-1
-  j<-1
 }
 
     # Bucle para obtener el número de fila en el que empieza el primer día
@@ -207,21 +260,52 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
   final<-i
 }
 
-  # Graficación de ambas medias móviles
+  # Graficación de ambas medias móviles y de la señal sin media móvil
 
 {
+  plot(subset$marca_tiempo[comienzo:final],
+       subset$ocupantes_conteo[comienzo:final],
+       xlab="Hora", ylab="Número de ocupantes",
+       ylim=c(min(dataset$ocupantes_conteo),
+              max(dataset$ocupantes_conteo)))
+  
+  png(paste(wd,"/plots/ocupantes_conteo_primer_dia_postmm.png",sep=""), 
+      width=800, height=800)
+  plot(subset$marca_tiempo[comienzo:final],
+       subset$ocupantes_conteo[comienzo:final],
+       xlab="Hora", ylab="Número de ocupantes",
+       ylim=c(min(dataset$ocupantes_conteo),
+              max(dataset$ocupantes_conteo)))
+  dev.off()
+  
+  plot(subset$marca_tiempo[comienzo:final],
+       subset$ocupantes_conteo_robus3[comienzo:final],
+       xlab="Hora", ylab="Número de ocupantes",
+       ylim=c(min(dataset$ocupantes_conteo),
+              max(dataset$ocupantes_conteo)))
+  
   png(paste(wd,"/plots/ocupantes_conteo_robus3_primer_dia.png",sep=""), 
       width=800, height=800)
   plot(subset$marca_tiempo[comienzo:final],
        subset$ocupantes_conteo_robus3[comienzo:final],
-       xlab="hora", ylab="número de ocupantes")
+       xlab="Hora", ylab="Número de ocupantes",
+       ylim=c(min(dataset$ocupantes_conteo),
+              max(dataset$ocupantes_conteo)))
   dev.off()
+  
+  plot(subset$marca_tiempo[comienzo:final],
+       subset$ocupantes_conteo_robus5[comienzo:final],
+       xlab="Hora", ylab="Número de ocupantes",
+       ylim=c(min(dataset$ocupantes_conteo),
+              max(dataset$ocupantes_conteo)))
   
   png(paste(wd,"/plots/ocupantes_conteo_robus5_primer_dia.png",sep=""),
       width=800, height=800)
   plot(subset$marca_tiempo[comienzo:final],
        subset$ocupantes_conteo_robus5[comienzo:final],
-       xlab="hora", ylab="número de ocupantes")
+       xlab="Hora", ylab="Número de ocupantes",
+       ylim=c(min(dataset$ocupantes_conteo),
+              max(dataset$ocupantes_conteo)))
   dev.off() 
 }
 
@@ -233,18 +317,215 @@ dataset<-cbind(dataset, ocupantes_conteo_robus3)
 
 #-------------------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-
 # Eliminación de los NAs del dataset
 
 dataset<-na.omit(dataset)
 
 #-------------------------------------------------------------------------------
 
+# Exportar dataset
+
+write.csv2(dataset, paste(wd,"/datasets/room4_preprocesado1.csv",sep=""), 
+           row.names=FALSE) 
+
+#-------------------------------------------------------------------------------
+
 # Limpiado de variables
 
-rm(i,j,exit,comienzo,final,subset,marca_tiempo,
-   ocupantes_conteo_robus3,ocupantes_conteo_robus5)
+rm(i, exit, subset, marca_tiempo, ocupantes_conteo,
+   ocupantes_conteo_robus3, ocupantes_conteo_robus5)
+
+#===============================================================================
+
+#===============================================================================
+# Graficación de las siguientes señales para los dos primeros días de los que se
+# tienen datos completos:
+  # - Temperatura interior
+  # - Temperatura exterior
+  # - Energía de agua refrigerada
+  # - Radiación_solar_global_horizontal
+#-------------------------------------------------------------------------------
+
+# Bucles para delimitar en qué filas del dataset comienza y termina el primer
+# día del que se tiene datos.
+
+  # Variables auxiliares para los bucles
+{
+  exit<-0
+  i<-1
+}
+
+  # Bucle para obtener el número de fila en el que empieza el primer día
+
+{
+  while (exit!=1) {
+    if (as.numeric(format(dataset[i,"marca_tiempo"],"%H"))==00 & 
+        as.numeric(format(dataset[i,"marca_tiempo"],"%M"))==00) {
+      exit<-1
+    } else {
+      i<-i+1
+    }
+  }
+  comienzo<-i
+}
+
+  # Bucle para obtener el número de fila en el que acaba el primer día
+
+{
+  exit<-0
+  
+  while (exit!=1) {
+    if (as.numeric(format(dataset[i,"marca_tiempo"],"%H"))==23 &
+        as.numeric(format(dataset[i,"marca_tiempo"],"%M"))==55) {
+      exit<-1
+    } else {
+      i<-i+1
+    }
+  }
+  final<-i
+}
+
+#-------------------------------------------------------------------------------
+
+# Graficación del primer día
+
+{
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$temperatura_interior[comienzo:final],
+       xlab="Hora", ylab="Temperatura interior [ºC]",
+       ylim=c(min(dataset$temperatura_interior),
+              max(dataset$temperatura_interior)))
+  
+  png(paste(wd,"/plots/graf_temperatura_interior1.png",sep=""), 
+      width=800, height=800)
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$temperatura_interior[comienzo:final],
+       xlab="Hora", ylab="Temperatura interior [ºC]",
+       ylim=c(min(dataset$temperatura_interior),
+              max(dataset$temperatura_interior)))
+  dev.off()
+  
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$temperatura_exterior[comienzo:final],
+       xlab="Hora", ylab="Temperatura exterior [ºC]",
+       ylim=c(min(dataset$temperatura_exterior),
+              max(dataset$temperatura_exterior)))
+  
+  png(paste(wd,"/plots/graf_temperatura_exterior1.png",sep=""), 
+      width=800, height=800)
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$temperatura_exterior[comienzo:final],
+       xlab="Hora", ylab="Temperatura exterior [ºC]",
+       ylim=c(min(dataset$temperatura_exterior),
+              max(dataset$temperatura_exterior)))
+  dev.off()
+  
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$energia_agua_refrigerada[comienzo:final],
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]",
+       ylim=c(min(dataset$energia_agua_refrigerada),
+              max(dataset$energia_agua_refrigerada)))
+  
+  png(paste(wd,"/plots/graf_energia_agua_refrigerada1.png",sep=""), 
+      width=800, height=800)
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$energia_agua_refrigerada[comienzo:final],
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]",
+       ylim=c(min(dataset$energia_agua_refrigerada),
+              max(dataset$energia_agua_refrigerada)))
+  dev.off()
+  
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$radiacion_solar_global_horizontal[comienzo:final],
+       xlab="Hora", ylab="Radiación solar global horizontal [W/m2]",
+       ylim=c(min(dataset$radiacion_solar_global_horizontal),
+              max(dataset$radiacion_solar_global_horizontal)))
+  
+  png(paste(wd,"/plots/graf_radiacion_solar_global_horizontal1.png",sep=""), 
+      width=800, height=800)
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$radiacion_solar_global_horizontal[comienzo:final],
+       xlab="Hora", ylab="Radiación solar global horizontal [W/m2]",
+       ylim=c(min(dataset$radiacion_solar_global_horizontal),
+              max(dataset$radiacion_solar_global_horizontal)))
+  dev.off() 
+}
+
+#-------------------------------------------------------------------------------
+
+# Graficación del segundo día
+
+{
+  diferencia<-final-comienzo
+  comienzo<-comienzo+diferencia+1
+  final<-final+diferencia+1
+  
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$temperatura_interior[comienzo:final],
+       xlab="Hora", ylab="Temperatura interior [ºC]",
+       ylim=c(min(dataset$temperatura_interior),
+              max(dataset$temperatura_interior)))
+  
+  png(paste(wd,"/plots/graf_temperatura_interior2.png",sep=""), 
+      width=800, height=800)
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$temperatura_interior[comienzo:final],
+       xlab="Hora", ylab="Temperatura interior [ºC]",
+       ylim=c(min(dataset$temperatura_interior),
+              max(dataset$temperatura_interior)))
+  dev.off()
+  
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$temperatura_exterior[comienzo:final],
+       xlab="Hora", ylab="Temperatura exterior [ºC]",
+       ylim=c(min(dataset$temperatura_exterior),
+              max(dataset$temperatura_exterior)))
+  
+  png(paste(wd,"/plots/graf_temperatura_exterior2.png",sep=""), 
+      width=800, height=800)
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$temperatura_exterior[comienzo:final],
+       xlab="Hora", ylab="Temperatura exterior [ºC]",
+       ylim=c(min(dataset$temperatura_exterior),
+              max(dataset$temperatura_exterior)))
+  dev.off()
+  
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$energia_agua_refrigerada[comienzo:final],
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]",
+       ylim=c(min(dataset$energia_agua_refrigerada),
+              max(dataset$energia_agua_refrigerada)))
+  
+  png(paste(wd,"/plots/graf_energia_agua_refrigerada2.png",sep=""), 
+      width=800, height=800)
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$energia_agua_refrigerada[comienzo:final],
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]",
+       ylim=c(min(dataset$energia_agua_refrigerada),
+              max(dataset$energia_agua_refrigerada)))
+  dev.off()
+  
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$radiacion_solar_global_horizontal[comienzo:final],
+       xlab="Hora", ylab="Radiación solar global horizontal [W/m2]",
+       ylim=c(min(dataset$radiacion_solar_global_horizontal),
+              max(dataset$radiacion_solar_global_horizontal)))
+  
+  png(paste(wd,"/plots/graf_radiacion_solar_global_horizontal2.png",sep=""), 
+      width=800, height=800)
+  plot(dataset$marca_tiempo[comienzo:final], 
+       dataset$radiacion_solar_global_horizontal[comienzo:final],
+       xlab="Hora", ylab="Radiación solar global horizontal [W/m2]",
+       ylim=c(min(dataset$radiacion_solar_global_horizontal),
+              max(dataset$radiacion_solar_global_horizontal)))
+  dev.off() 
+}
+
+#-------------------------------------------------------------------------------
+
+# Limpiado de variables
+
+rm(comienzo, final, diferencia, exit, i)
 
 #===============================================================================
 
@@ -288,8 +569,8 @@ rm(i,j,exit,comienzo,final,subset,marca_tiempo,
 #-------------------------------------------------------------------------------
 
 # Se entiende que hay una errata en las ecuaciones propuestas por los autores,
-# dado que entendiendo L_loc y L_st como lo recogen en el Solar Engineering
-# of Thermal Processes (4th ed.), la diferencia queda de signo contrario al que
+# dado que entendiendo L_loc y L_st como se recogen en Solar Engineering of
+# Thermal Processes (4th ed.), la diferencia queda de signo contrario al que
 # debería.
 
 # Por lo tanto, se considera:
@@ -307,9 +588,9 @@ rm(i,j,exit,comienzo,final,subset,marca_tiempo,
               0.032077*sin(B*pi/180)-
               0.014615*cos(2*B*pi/180)-
               0.04089*sin(2*B*pi/180))
+  
+  hora_solar<-dataset$marca_tiempo + seconds_to_period(60*(4*(L_st-L_loc)+E))
 }
-
-hora_solar<-dataset$marca_tiempo + seconds_to_period(60*(4*(L_st-L_loc)+E))
 
 #-------------------------------------------------------------------------------
 
@@ -319,9 +600,96 @@ dataset<-cbind(dataset,hora_solar)
 
 #-------------------------------------------------------------------------------
 
+# Exportar dataset
+
+write.csv2(dataset, paste(wd,"/datasets/room4_preprocesado2.csv",sep=""), 
+           row.names=FALSE) 
+
+#-------------------------------------------------------------------------------
+
 # Limpiado de variables
 
 rm(B,E,hora_solar,L_loc,L_st)
+
+#===============================================================================
+
+#===============================================================================
+# Correlaciones entre variables relevantes
+#-------------------------------------------------------------------------------
+
+# Correlaciones entre las variables:
+  # a. Temperatura ambiental exterior, temperatura ambiental interior y número
+  #    de personas
+  # b. Temperatura ambiental exterior, radiación solar, número de personas y
+  #    consumo de climatización
+  # c. Temperatura ambiental exterior, radiación solar, hora solar y consumo de
+  #    climatización
+
+{
+  hora<-hour(dataset$hora_solar)
+  dataset<-cbind(dataset,hora)
+  
+  nombres<-names(dataset)
+  nombres
+  
+  # a. Temperatura ambiental exterior, temperatura ambiental interior y número de
+  # personas
+  
+    # Coeficientes de correlación de Pearson
+  matrizcorrel1<-(cor(dataset[,nombres %in% nombres[c(28,5,36)]]))
+  write.csv2(matrizcorrel1, 
+             paste(wd,"/correlations/matriz_correlaciones1.csv", sep=""))
+  
+   # Graficación de las señales, unas con respecto a otras
+  plot(dataset[,nombres %in% nombres[c(28,5,36)]])
+  png(filename=paste(wd,"/correlations/correlaciones1.png", sep=""), 
+      width=800, height=800)
+  plot(dataset[,nombres %in% nombres[c(28,5,36)]])
+  dev.off()
+  
+  # b. Temperatura ambiental exterior, radiación solar, número de personas y
+  # consumo de climatización
+  
+    # Coeficientes de correlación de Pearson
+  matrizcorrel2<-(cor(dataset[,nombres %in% nombres[c(28,29,36,13)]]))
+  write.csv2(matrizcorrel2, 
+             paste(wd,"/correlations/matriz_correlaciones2.csv", sep=""))
+  
+    # Graficación de las señales, unas con respecto a otras
+  plot(dataset[,nombres %in% nombres[c(28,29,36,13)]])
+  png(filename=paste(wd,"/correlations/correlaciones2.png", sep=""), 
+      width=800, height=800)
+  plot(dataset[,nombres %in% nombres[c(28,29,36,13)]])
+  dev.off()
+  
+  # c. Temperatura ambiental exterior, radiación solar, hora solar y consumo de
+  # climatización
+  
+  # Coeficientes de correlación de Pearson
+  matrizcorrel3<-(cor(dataset[,nombres %in% nombres[c(28,29,38,13)]]))
+  write.csv2(matrizcorrel3, 
+             paste(wd,"/correlations/matriz_correlaciones3.csv", sep=""))
+  
+  # Graficación de las señales, unas con respecto a otras
+  plot(dataset[,nombres %in% nombres[c(28,29,38,13)]])
+  png(filename=paste(wd,"/correlations/correlaciones3.png", sep=""), 
+      width=800, height=800)
+  plot(dataset[,nombres %in% nombres[c(28,29,38,13)]])
+  dev.off()
+}
+
+#-------------------------------------------------------------------------------
+
+# Eliminar del dataset la variable "hora" creada para el cálculo de las
+# correlaciones
+
+dataset<-subset(dataset, select=-hora)
+
+#-------------------------------------------------------------------------------
+
+# Limpiado de variables
+
+rm(matrizcorrel1, matrizcorrel2, matrizcorrel3, hora, nombres)
 
 #===============================================================================
 
@@ -1163,12 +1531,8 @@ rm(temperatura_interior_med, temperatura_interior_pred,
 
 #-------------------------------------------------------------------------------
 
-# A partir del ARX con el instante de tiempo actual y un instante de tiempo
-# pasado (se elige porque tiene un R2>0,98), se analiza la significatividad de
-# las variables  desde las mas antiguas
-  # Ejemplo: si en el instante anterior de la radiación solar es significativa,
-  # se consideran como significativos lo instantes del quinto al
-  # actual para la radiacion solar
+# A partir del ARX con el instante de tiempo actual (se elige porque tiene un 
+# R2>0,98), se analiza la significatividad de las variables
 
 {
   obs_anteriores<-0
