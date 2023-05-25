@@ -1168,10 +1168,8 @@ for (i in 1:length(sampleo)){
 
 # Limpiado de variables
 
-rm(i,j,k,
-   nombre_dataframe,
-   obs_anteriores,
-   dataframe_trabajo)
+rm(i,j,k, nombre_dataframe, obs_anteriores, dataframe_trabajo, dataframe_15,
+   dataframe_30, sampleo, dataframe)
 
 #===============================================================================
 
@@ -1185,6 +1183,8 @@ rm(i,j,k,
 
 {
   sampleo<-60
+  
+  obs_anteriores<-horas_anteriores*60/sampleo
   
   nombre_dataframe<-paste("dataframe", sampleo, sep="_")
   dataframe_trabajo<-get(nombre_dataframe) 
@@ -1210,8 +1210,6 @@ rm(i,j,k,
     if (i<length(variables_regresion_input))
       formula<-paste(formula, " +", sep="") 
   }
-  
-  obs_anteriores<-horas_anteriores*60/sampleo
   
   for (i in 1:obs_anteriores) {
     nombre_var<-paste(regresion_output, "_", i, sep="")
@@ -1327,17 +1325,7 @@ rm(i,j,k,
 
 # Limpiado de variables
 
-rm(formula,
-   horas_anteriores,
-   i, j, k,
-   minimo,
-   nombre_dataframe,
-   nombre_var,
-   quitar,
-   sampleo,
-   y,
-   a, arx,
-   dataframe)
+rm(formula, i, j, k, minimo,nombre_dataframe, nombre_var, quitar, y, a, arx)
 
 #-------------------------------------------------------------------------------
 
@@ -1404,8 +1392,8 @@ rm(formula,
 
 # Limpiado de variables
 
-rm(temperatura_interior_med, temperatura_interior_pred,
-   x, matriz_resultados)
+rm(temperatura_interior_med, temperatura_interior_pred, x, matriz_resultados,
+   horas_anteriores, sampleo)
 
 #===============================================================================
 
@@ -1721,6 +1709,16 @@ rm(temperatura_interior_med, temperatura_interior_pred,
   dev.off() 
 }
 
+#-------------------------------------------------------------------------------
+
+# Limpiado de variables
+
+rm(a, arx, dataframe_resultados, dataframe_trabajo_norm,
+   dataframe_trabajo_norm_test, dataframe_trabajo_norm_train, dejadas, exit,
+   final, formula, fraccion_train, i, j, k, longitud, maximo, minimo,
+   nombre_columna, nombre_var, temperatura_interior_med,
+   temperatura_interior_pred)
+
 #===============================================================================
 
 #===============================================================================
@@ -1838,9 +1836,9 @@ rm(temperatura_interior_med, temperatura_interior_pred,
     }
   }
   
-  attach(dataframe_trabajo_norm_train)
+  attach(dataframe_trabajo)
   arx<-lm(formula)
-  detach(dataframe_trabajo_norm_train)
+  detach(dataframe_trabajo)
   a<-summary(arx)
   
   for (j in obs_anteriores:0){
@@ -2004,15 +2002,1284 @@ rm(temperatura_interior_med, temperatura_interior_pred,
 
 # Limpiado de variables
 
-rm(a, arx,
-   dataframe_15, dataframe_30, dataframe_60,
-   dataframe_resultados, dataframe_trabajo,
-   dejadas, exit, final, formula, i, j, k, nombre_columna, nombre_var,
-   nombres_filas, numero_filas, obs_anteriores, quitar, regresion_output,
-   temperatura_interior_med, temperatura_interior_pred,
-   variables_regresion_input, wd, x,
-   fraccion_train, longitud, maximo, minimo,
-   dataframe_trabajo_norm, dataframe_trabajo_norm_test, 
-   dataframe_trabajo_norm_train, grados_margen)
+rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
+   nombre_columna, nombre_var, quitar,temperatura_interior_med, 
+   temperatura_interior_pred, x)
+
+#===============================================================================
+
+#===============================================================================
+# Tras el análisis de los 3 ARX se llega a la conclusión de que se van a emplear
+# 8 enfoques (2x2x2)
+  # - Intersección en 0 o libre
+  # - Extender el modelo desde el instante inicial hasta el pasado o modelo
+  #   completo e ir reduciendo
+  # - Extender/reducir por pasos de tiempo o por identificación de variable
+  #   más/menos relevante (que haya los mismos pasos de tiempo de todas las 
+  #   variables o que haya diferentes pasos de tiempo para cada variable)
+#===============================================================================
+
+#===============================================================================
+# Enfoque 1:
+  # Intersección en 0
+  # Extensión del modelo desde el instante inicial hasta el pasado
+  # Extensión por pasos de tiempo
+#-------------------------------------------------------------------------------
+
+# Creación del dataframe de resultados
+
+{
+  obs_anteriores<-6
+  
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
+  rownames(dataframe_resultados)<-nombres_filas
+  colnames(dataframe_resultados)<-"instante_actual"
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX con los diferentes pasos de tiempo
+
+{
+  for (j in 0:obs_anteriores){
+    formula<-paste(regresion_output, " ~ 0 +", sep="")
+    
+    for (i in 1:length(variables_regresion_input)){
+      formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+      if (i<length(variables_regresion_input)){
+        formula<-paste(formula, " +", sep="")
+      }
+    }
+    
+    if (j>0){
+      for (i in 1:j) {
+        nombre_var<-paste(regresion_output, "_", i, sep="")
+        formula<-paste(formula, " + ", nombre_var, sep="") 
+        
+        nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+        
+        for (k in 1:length(nombre_var)) {
+          formula<-paste(formula, " + ",nombre_var[k], sep="")
+        }
+      }
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-j+1
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    if (j==0){
+      for (i in 1:nrow(dataframe_resultados)){
+        for (k in 1:length(names(arx$coefficients))){
+          if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+            dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
+          }
+        }
+        if (rownames(dataframe_resultados)[i] == "R2"){
+          dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+        }
+        if (rownames(dataframe_resultados)[i] == "MAE"){
+          dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                       temperatura_interior_pred)
+        }
+      }
+    } else {
+      nombre_columna<-paste("instante_pasado", j, sep="_")
+      dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
+      colnames(dataframe_resultados)[j+1]<-nombre_columna
+      for (i in 1:nrow(dataframe_resultados)){
+        for (k in 1:length(names(arx$coefficients))){
+          if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+            dataframe_resultados[i,j+1]<-arx$coefficients[k]
+          }
+        }
+        if (rownames(dataframe_resultados)[i] == "R2"){
+          dataframe_resultados[i,j+1]<-summary(arx)$r.squared
+        }
+        if (rownames(dataframe_resultados)[i] == "MAE"){
+          dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
+                                           temperatura_interior_pred)
+        }
+      }
+    }
+  } 
+}
+
+#-------------------------------------------------------------------------------
+
+# Exportar el dataframe de resultados a archivo csv
+
+write.csv2(dataframe_resultados, 
+           paste(wd,"/output/dataframe_resultados_1.csv", sep=""))
+
+#===============================================================================
+
+#===============================================================================
+# Enfoque 2:
+  # Intersección en 0
+  # Extensión del modelo desde el instante inicial hasta el pasado
+  # Extensión por identificación de variable más relevante
+#-------------------------------------------------------------------------------
+
+# Creación de la ecuación de regresión del modelo introduciendo todas las
+# variables y todas las observaciones anteriores de las variables
+
+{
+  obs_anteriores<-6
+  
+  variables_regresion_input<-c("ocupantes_conteo_robus3",
+                               "temperatura_exterior",
+                               "energia_agua_refrigerada",
+                               "radiacion_global_fachada")
+  
+  regresion_output<-"temperatura_interior"
+  
+  formula<-paste(regresion_output, " ~ 0 +", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX con el instante actual
+
+{
+  attach(dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+}
+
+#-------------------------------------------------------------------------------
+
+# Creación del dataframe de resultados
+
+{
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
+  rownames(dataframe_resultados)<-nombres_filas
+  colnames(dataframe_resultados)<-"instante_actual" 
+}
+
+#-------------------------------------------------------------------------------
+
+# Introducción del primer ARX en el dataframe de resultados
+
+{
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-dataframe_trabajo$temperatura_interior
+  
+  for (i in 1:nrow(dataframe_resultados)){
+    for (j in 1:length(arx$coefficients)){
+      if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
+        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+      }
+    }
+    if (rownames(dataframe_resultados)[i] == "R2"){
+      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+    }
+    if (rownames(dataframe_resultados)[i] == "MAE"){
+      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                   temperatura_interior_pred)
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX
+
+  # Quitar las variables no significativas del primer ARX
+
+dejadas<-c()
+
+for (i in 1:length(arx$coefficients)){
+  if (a[["coefficients"]][i,4] > 0.05){
+    quitar<-names(arx$coefficients[i])
+    formula<-gsub(quitar, "", formula)
+  }else{
+    dejadas<-c(dejadas, names(arx$coefficients)[i])
+  }
+}
+
+  # Bucle que introduce cada vez un nuevo paso de tiempo y quita las variables
+  # no significativas. Cuando una variable no es signficativa par aun paso de
+  # tiempo, se considera no significativa para los siguientes y no se introduce
+  # en la regresión
+
+for (i in 1:obs_anteriores){
+  
+  if (i == 1){
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    for (j in 1:length(nombre_var)) {
+      formula<-paste(formula, " + ",nombre_var[j], sep="")
+    }
+  }else{
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    final<-nchar(nombre_var)
+    for (j in 1:length(dejadas)){
+      if (dejadas[j]==substring(nombre_var, 1, final-2)){
+        formula<-paste(formula, " + ",nombre_var[j], sep="")
+      }else{
+        quitadas<-substring(nombre_var, 1, final-2)
+      }
+    }
+  }
+  
+  nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+  
+  for (j in 1:length(nombre_var)){
+    final<-nchar(nombre_var[j])
+    for (k in 1:length(dejadas)){
+      if (dejadas[k] == substring(nombre_var[j], 1, final-2)){
+        formula<-paste(formula, " + ", nombre_var[j], sep="")
+      }
+    }
+  }
+  
+  attach(dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+  
+  x<-i+1
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-
+    dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+
+  nombre_columna<-paste("instante_pasado", i, sep="_")
+  dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
+  colnames(dataframe_resultados)[i+1]<-nombre_columna
+  
+  for (j in 1:nrow(dataframe_resultados)){
+    for (k in 1:length(names(arx$coefficients))){
+      if (rownames(dataframe_resultados[j,0])==names(arx$coefficients)[k]){
+        dataframe_resultados[j,i+1]<-arx$coefficients[k]
+      }
+    }
+    if (rownames(dataframe_resultados)[j] == "R2"){
+      dataframe_resultados[j,i+1]<-summary(arx)$r.squared
+    }
+    if (rownames(dataframe_resultados)[j] == "MAE"){
+      dataframe_resultados[j,i+1]<-mae(temperatura_interior_med,
+                                       temperatura_interior_pred)
+    }
+  }
+  
+  dejadas<-c()
+  
+  for (j in 1:length(arx$coefficients)){
+    final<-nchar(names(arx$coefficients[j]))
+    if (a[["coefficients"]][j,4] > 0.05 &
+        substring(names(arx$coefficients[j]), final-1, final-1) == "_" & 
+        substring(names(arx$coefficients[j]), final, final) == i){
+      quitar<-names(arx$coefficients[j])
+      formula<-gsub(quitar, "", formula)
+    }else if (a[["coefficients"]][j,4] <= 0.05 &
+              substring(names(arx$coefficients[j]), final-1, final-1) == "_" & 
+              substring(names(arx$coefficients[j]), final, final) == i){
+      dejadas<-c(dejadas, substring(names(arx$coefficients)[j], 1, final-2))
+    }
+  }
+  final<-nchar(formula)
+  while (substring(formula, final, final) == " " || 
+         substring(formula, final, final) == "+"){
+    formula<-substring(formula, 1, final-1)
+    final<-final-1
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# Exportar el dataframe de resultados a archivo csv
+
+write.csv2(dataframe_resultados, 
+           paste(wd,"/output/dataframe_resultados_2.csv", sep=""))
+
+#===============================================================================
+
+#===============================================================================
+# Enfoque 3:
+  # Intersección en 0
+  # Modelo completo e ir reduciendo
+  # Reducción por pasos de tiempo
+
+#-------------------------------------------------------------------------------
+
+# Creación de la ecuación de regresión del modelo introduciendo todas las
+# variables y todas las observaciones anteriores de las variables
+
+{
+  obs_anteriores<-6
+  
+  variables_regresion_input<-c("ocupantes_conteo_robus3",
+                               "temperatura_exterior",
+                               "energia_agua_refrigerada",
+                               "radiacion_global_fachada")
+  
+  regresion_output<-"temperatura_interior"
+  
+  formula<-paste(regresion_output, " ~ 0 +", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+  
+  for (i in 1:obs_anteriores) {
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    formula<-paste(formula, " + ", nombre_var, sep="") 
+    
+    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+    
+    for (j in 1:length(nombre_var)) {
+      formula<-paste(formula, " + ",nombre_var[j], sep="")
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX completo
+
+{
+  attach(dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+}
+
+#-------------------------------------------------------------------------------
+
+# Creación del dataframe de resultados
+
+{
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
+  rownames(dataframe_resultados)<-nombres_filas
+  colnames(dataframe_resultados)<-"instante_actual" 
+}
+
+#-------------------------------------------------------------------------------
+
+# Introducción del primer ARX en el dataframe de resultados
+
+{
+  x<-obs_anteriores+1
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-
+    dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+  
+  for (i in 1:nrow(dataframe_resultados)){
+    for (j in 1:length(arx$coefficients)){
+      if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
+        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+      }
+    }
+    if (rownames(dataframe_resultados)[i] == "R2"){
+      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+    }
+    if (rownames(dataframe_resultados)[i] == "MAE"){
+      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                   temperatura_interior_pred)
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX cada vez con un paso de tiempo menos
+
+{
+  for (j in obs_anteriores:1){
+    for (i in 1:length(arx$coefficients)){
+      final<-nchar(names(arx$coefficients[i]))
+      if (substring(names(arx$coefficients[i]), final, final) == j &
+          substring(names(arx$coefficients[i]), final-1, final-1) == "_"){
+        quitar<-names(arx$coefficients[i])
+        formula<-gsub(quitar, " ", formula)
+      }
+      final<-nchar(formula)
+      while (substring(formula, final, final) == " " || 
+             substring(formula, final, final) == "+"){
+        formula<-substring(formula, 1, final-1)
+        final<-final-1
+      }
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-j
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    dataframe_resultados$mas<-NA
+    
+    for (i in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(arx$coefficients)){
+        if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[k]){
+          dataframe_resultados$mas[i]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(dataframe_resultados)[i] == "R2"){
+        dataframe_resultados$mas[i]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[i] == "MAE"){
+        dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
+                                         temperatura_interior_pred)
+      }
+    }
+    l<-which(names(dataframe_resultados) == "mas")
+    nombre_columna<-paste("iteracion", "_", l, sep="")
+    colnames(dataframe_resultados)[l]<-nombre_columna
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# Exportar el dataframe de resultados a archivo csv
+
+write.csv2(dataframe_resultados, 
+           paste(wd,"/output/dataframe_resultados_3.csv", sep=""))
+
+#===============================================================================
+
+#===============================================================================
+# Enfoque 4:
+  # Intersección en 0
+  # Modelo completo e ir reduciendo
+  # Reducción por identificación de variable menos relevante
+#-------------------------------------------------------------------------------
+
+# Fórmula completa
+
+{
+  obs_anteriores<-6
+  dejadas<-c()
+  
+  formula<-paste(regresion_output, " ~ 0 + ", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+  
+  for (i in 1:obs_anteriores) {
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    formula<-paste(formula, " + ", nombre_var, sep="") 
+    
+    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+    
+    for (j in 1:length(nombre_var)) {
+      formula<-paste(formula, " + ",nombre_var[j], sep="")
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX con todos los pasos de tiempo anteriores y todas las variables
+
+{
+  attach(dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+}
+
+#-------------------------------------------------------------------------------
+
+# Creación del dataframe de resultados e introducción del primer ARX
+
+{
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
+  rownames(dataframe_resultados)<-nombres_filas
+  colnames(dataframe_resultados)<-"instante_actual"
+  
+  x<-obs_anteriores+1
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-
+    dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+  
+  for (i in 1:nrow(dataframe_resultados)){
+    for (j in 1:length(arx$coefficients)){
+      if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
+        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+      }
+    }
+    if (rownames(dataframe_resultados)[i] == "R2"){
+      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+    }
+    if (rownames(dataframe_resultados)[i] == "MAE"){
+      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                   temperatura_interior_pred)
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# Reducción del ARX según la significatividad de las variables (cuando una
+# variable es significativa para un paso de tiempo, se considera significativa
+# para los pasos de tiempo restantes hasta el actual)
+
+{
+  for (j in obs_anteriores:0){
+    exit=0
+    if (j==obs_anteriores){
+      for (i in 1:length(names(arx$coefficients))){
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final,final)==obs_anteriores){
+          if (a[["coefficients"]][i,4]>0.05){
+            quitar<-names(arx$coefficients[i])
+            formula<-gsub(quitar, "", formula)
+          }else{
+            dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
+          }
+        }
+      }
+      
+    }else if (j<obs_anteriores & j>0){
+      for (i in 1:length(names(arx$coefficients))){
+        exit<-0
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final-1,final) == paste("_", 
+                                                                         j, 
+                                                                         sep="")){
+          if (a[["coefficients"]][i,4]>0.05){
+            for (k in 1:length(dejadas)){
+              if (substring(names(arx$coefficients[i]),1,final-2) == dejadas[k]){
+                exit<-1
+              }
+            }
+            if (exit!=1){
+              quitar<-names(arx$coefficients[i])
+              formula<-gsub(quitar, "", formula)
+            }
+          }else{
+            dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
+          }
+        }
+      }
+      
+    }else if (j==0){
+      for (i in 1:length(names(arx$coefficients))){
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final-1,final-1) != "_"){
+          exit<-0
+          if (a[["coefficients"]][i,4]>0.05){
+            for (k in 1:length(dejadas)){
+              if (names(arx$coefficients[i])==dejadas[k]){
+                exit<-1
+              }
+            }
+            if (exit!=1){
+              quitar<-names(arx$coefficients[i])
+              formula<-gsub(quitar, " ", formula)
+            }
+          }
+        }
+      }
+    }
+    
+    final<-nchar(formula)
+    while (substring(formula, final, final) == " " || 
+           substring(formula, final, final) == "+"){
+      formula<-substring(formula, 1, final-1)
+      final<-final-1
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-obs_anteriores+1
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    dataframe_resultados$mas<-NA
+    
+    for (i in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(arx$coefficients)){
+        if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[k]){
+          dataframe_resultados$mas[i]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(dataframe_resultados)[i] == "R2"){
+        dataframe_resultados$mas[i]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[i] == "MAE"){
+        dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
+                                         temperatura_interior_pred)
+      }
+    }
+    j<-which(names(dataframe_resultados) == "mas")
+    nombre_columna<-paste("iteracion", "_", j, sep="")
+    colnames(dataframe_resultados)[j]<-nombre_columna
+  } 
+}
+
+#-------------------------------------------------------------------------------
+
+# Exportar el dataframe de resultados a archivo csv
+
+write.csv2(dataframe_resultados, 
+           paste(wd,"/output/dataframe_resultados_4.csv", sep=""))
+
+#===============================================================================
+
+#===============================================================================
+# Enfoque 5:
+  # Intersección libre
+  # Extensión del modelo desde el instante inicial hasta el pasado
+  # Extensión por pasos de tiempo
+#-------------------------------------------------------------------------------
+
+# Creación del dataframe de resultados
+
+{
+  obs_anteriores<-6
+  
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  rownames(dataframe_resultados)<-c("(Intercept)",nombres_filas)
+  colnames(dataframe_resultados)<-"instante_actual"
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX con los diferentes pasos de tiempo
+
+{
+  for (j in 0:obs_anteriores){
+    formula<-paste(regresion_output, " ~ ", sep="")
+    
+    for (i in 1:length(variables_regresion_input)){
+      formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+      if (i<length(variables_regresion_input)){
+        formula<-paste(formula, " +", sep="")
+      }
+    }
+    
+    if (j>0){
+      for (i in 1:j) {
+        nombre_var<-paste(regresion_output, "_", i, sep="")
+        formula<-paste(formula, " + ", nombre_var, sep="") 
+        
+        nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+        
+        for (k in 1:length(nombre_var)) {
+          formula<-paste(formula, " + ",nombre_var[k], sep="")
+        }
+      }
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-j+1
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    if (j==0){
+      for (i in 1:nrow(dataframe_resultados)){
+        for (k in 1:length(names(arx$coefficients))){
+          if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+            dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
+          }
+        }
+        if (rownames(dataframe_resultados)[i] == "R2"){
+          dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+        }
+        if (rownames(dataframe_resultados)[i] == "MAE"){
+          dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                       temperatura_interior_pred)
+        }
+      }
+    } else {
+      nombre_columna<-paste("instante_pasado", j, sep="_")
+      dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
+      colnames(dataframe_resultados)[j+1]<-nombre_columna
+      for (i in 1:nrow(dataframe_resultados)){
+        for (k in 1:length(names(arx$coefficients))){
+          if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
+            dataframe_resultados[i,j+1]<-arx$coefficients[k]
+          }
+        }
+        if (rownames(dataframe_resultados)[i] == "R2"){
+          dataframe_resultados[i,j+1]<-summary(arx)$r.squared
+        }
+        if (rownames(dataframe_resultados)[i] == "MAE"){
+          dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
+                                           temperatura_interior_pred)
+        }
+      }
+    }
+  } 
+}
+
+#-------------------------------------------------------------------------------
+
+# Exportar el dataframe de resultados a archivo csv
+
+write.csv2(dataframe_resultados, 
+           paste(wd,"/output/dataframe_resultados_5.csv", sep=""))
+
+#===============================================================================
+
+#===============================================================================
+# Enfoque 6:
+  # Intersección libre
+  # Extensión del modelo desde el instante inicial hasta el pasado
+  # Extensión por identificación de variable más relevante
+#-------------------------------------------------------------------------------
+
+# Creación de la ecuación de regresión del modelo introduciendo todas las
+# variables y todas las observaciones anteriores de las variables
+
+{
+  obs_anteriores<-6
+  
+  variables_regresion_input<-c("ocupantes_conteo_robus3",
+                               "temperatura_exterior",
+                               "energia_agua_refrigerada",
+                               "radiacion_global_fachada")
+  
+  regresion_output<-"temperatura_interior"
+  
+  formula<-paste(regresion_output, " ~ ", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX con el instante actual
+
+{
+  attach(dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+}
+
+#-------------------------------------------------------------------------------
+
+# Creación del dataframe de resultados
+
+{
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  rownames(dataframe_resultados)<-c("(Intercept)", nombres_filas)
+  colnames(dataframe_resultados)<-"instante_actual" 
+}
+
+#-------------------------------------------------------------------------------
+
+# Introducción del primer ARX en el dataframe de resultados
+
+{
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-dataframe_trabajo$temperatura_interior
+  
+  for (i in 1:nrow(dataframe_resultados)){
+    for (j in 1:length(arx$coefficients)){
+      if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
+        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+      }
+    }
+    if (rownames(dataframe_resultados)[i] == "R2"){
+      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+    }
+    if (rownames(dataframe_resultados)[i] == "MAE"){
+      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                   temperatura_interior_pred)
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX
+
+  # Quitar las variables no significativas del primer ARX
+
+dejadas<-c()
+
+for (i in 1:length(arx$coefficients)){
+  if (a[["coefficients"]][i,4] > 0.05){
+    quitar<-names(arx$coefficients[i])
+    formula<-gsub(quitar, "", formula)
+  }else{
+    dejadas<-c(dejadas, names(arx$coefficients)[i])
+  }
+}
+
+  # Bucle que introduce cada vez un nuevo paso de tiempo y quita las variables
+  # no significativas. Cuando una variable no es signficativa par aun paso de
+  # tiempo, se considera no significativa para los siguientes y no se introduce
+  # en la regresión
+
+for (i in 1:obs_anteriores){
+  
+  if (length(dejadas) != 0){
+    if (i == 1){
+      nombre_var<-paste(regresion_output, "_", i, sep="")
+      for (j in 1:length(nombre_var)) {
+        formula<-paste(formula, " + ",nombre_var[j], sep="")
+      }
+    }else{
+      nombre_var<-paste(regresion_output, "_", i, sep="")
+      final<-nchar(nombre_var)
+      for (j in 1:length(dejadas)){
+        if (dejadas[j]==substring(nombre_var, 1, final-2)){
+          formula<-paste(formula, " + ",nombre_var[j], sep="")
+        }else{
+          quitadas<-substring(nombre_var, 1, final-2)
+        }
+      }
+    }
+    
+    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+    
+    for (j in 1:length(nombre_var)){
+      final<-nchar(nombre_var[j])
+      for (k in 1:length(dejadas)){
+        if (dejadas[k] == substring(nombre_var[j], 1, final-2)){
+          formula<-paste(formula, " + ", nombre_var[j], sep="")
+        }
+      }
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-i+1
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    nombre_columna<-paste("instante_pasado", i, sep="_")
+    dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
+    colnames(dataframe_resultados)[i+1]<-nombre_columna
+    
+    for (j in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(names(arx$coefficients))){
+        if (rownames(dataframe_resultados[j,0])==names(arx$coefficients)[k]){
+          dataframe_resultados[j,i+1]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(dataframe_resultados)[j] == "R2"){
+        dataframe_resultados[j,i+1]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[j] == "MAE"){
+        dataframe_resultados[j,i+1]<-mae(temperatura_interior_med,
+                                         temperatura_interior_pred)
+      }
+    }
+    
+    dejadas<-c()
+    
+    for (j in 2:length(arx$coefficients)){
+      final<-nchar(names(arx$coefficients[j]))
+      if (a[["coefficients"]][j,4] > 0.05 &
+          substring(names(arx$coefficients[j]), final-1, final-1) == "_" & 
+          substring(names(arx$coefficients[j]), final, final) == i){
+        quitar<-names(arx$coefficients[j])
+        formula<-gsub(quitar, "", formula)
+      }else if (a[["coefficients"]][j,4] <= 0.05 &
+                substring(names(arx$coefficients[j]), final-1, final-1) == "_" & 
+                substring(names(arx$coefficients[j]), final, final) == i){
+        dejadas<-c(dejadas, substring(names(arx$coefficients)[j], 1, final-2))
+      }
+    }
+    final<-nchar(formula)
+    while (substring(formula, final, final) == " " || 
+           substring(formula, final, final) == "+"){
+      formula<-substring(formula, 1, final-1)
+      final<-final-1
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# Exportar el dataframe de resultados a archivo csv
+
+write.csv2(dataframe_resultados, 
+           paste(wd,"/output/dataframe_resultados_6.csv", sep=""))
+
+#===============================================================================
+
+#===============================================================================
+# Enfoque 7:
+  # Intersección libre
+  # Modelo completo e ir reduciendo
+  # Reducción por pasos de tiempo
+#-------------------------------------------------------------------------------
+
+# Creación de la ecuación de regresión del modelo introduciendo todas las
+# variables y todas las observaciones anteriores de las variables
+
+{
+  obs_anteriores<-6
+  
+  variables_regresion_input<-c("ocupantes_conteo_robus3",
+                               "temperatura_exterior",
+                               "energia_agua_refrigerada",
+                               "radiacion_global_fachada")
+  
+  regresion_output<-"temperatura_interior"
+  
+  formula<-paste(regresion_output, " ~ ", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+  
+  for (i in 1:obs_anteriores) {
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    formula<-paste(formula, " + ", nombre_var, sep="") 
+    
+    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+    
+    for (j in 1:length(nombre_var)) {
+      formula<-paste(formula, " + ",nombre_var[j], sep="")
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX completo
+
+{
+  attach(dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+}
+
+#-------------------------------------------------------------------------------
+
+# Creación del dataframe de resultados
+
+{
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  rownames(dataframe_resultados)<-c("(Intercept)", nombres_filas)
+  colnames(dataframe_resultados)<-"instante_actual" 
+}
+
+#-------------------------------------------------------------------------------
+
+# Introducción del primer ARX en el dataframe de resultados
+
+{
+  x<-obs_anteriores+1
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-
+    dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+  
+  for (i in 1:nrow(dataframe_resultados)){
+    for (j in 1:length(arx$coefficients)){
+      if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
+        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+      }
+    }
+    if (rownames(dataframe_resultados)[i] == "R2"){
+      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+    }
+    if (rownames(dataframe_resultados)[i] == "MAE"){
+      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                   temperatura_interior_pred)
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX cada vez con un paso de tiempo menos
+
+{
+  for (j in obs_anteriores:1){
+    for (i in 1:length(arx$coefficients)){
+      final<-nchar(names(arx$coefficients[i]))
+      if (substring(names(arx$coefficients[i]), final, final) == j &
+          substring(names(arx$coefficients[i]), final-1, final-1) == "_"){
+        quitar<-names(arx$coefficients[i])
+        formula<-gsub(quitar, " ", formula)
+      }
+      final<-nchar(formula)
+      while (substring(formula, final, final) == " " || 
+             substring(formula, final, final) == "+"){
+        formula<-substring(formula, 1, final-1)
+        final<-final-1
+      }
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-j
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    dataframe_resultados$mas<-NA
+    
+    for (i in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(arx$coefficients)){
+        if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[k]){
+          dataframe_resultados$mas[i]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(dataframe_resultados)[i] == "R2"){
+        dataframe_resultados$mas[i]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[i] == "MAE"){
+        dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
+                                         temperatura_interior_pred)
+      }
+    }
+    l<-which(names(dataframe_resultados) == "mas")
+    nombre_columna<-paste("iteracion", "_", l, sep="")
+    colnames(dataframe_resultados)[l]<-nombre_columna
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# Exportar el dataframe de resultados a archivo csv
+
+write.csv2(dataframe_resultados, 
+           paste(wd,"/output/dataframe_resultados_7.csv", sep=""))
+
+#===============================================================================
+
+#===============================================================================
+# Enfoque 8:
+  # Intersección libre
+  # Modelo completo e ir reduciendo
+  # Reducción por identificación de variable menos relevante
+#-------------------------------------------------------------------------------
+
+# Fórmula completa
+
+{
+  obs_anteriores<-6
+  dejadas<-c()
+  
+  formula<-paste(regresion_output, " ~ ", sep="")
+  
+  for (i in 1:length(variables_regresion_input)) {
+    formula<-paste(formula, " ", variables_regresion_input[i], sep="") 
+    if (i<length(variables_regresion_input))
+      formula<-paste(formula, " +", sep="") 
+  }
+  
+  for (i in 1:obs_anteriores) {
+    nombre_var<-paste(regresion_output, "_", i, sep="")
+    formula<-paste(formula, " + ", nombre_var, sep="") 
+    
+    nombre_var<-paste(variables_regresion_input, "_", i, sep="")
+    
+    for (j in 1:length(nombre_var)) {
+      formula<-paste(formula, " + ",nombre_var[j], sep="")
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# ARX con todos los pasos de tiempo anteriores y todas las variables
+
+{
+  attach(dataframe_trabajo)
+  arx<-lm(formula)
+  detach(dataframe_trabajo)
+  a<-summary(arx)
+}
+
+#-------------------------------------------------------------------------------
+
+# Creación del dataframe de resultados e introducción del primer ARX
+
+{
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  rownames(dataframe_resultados)<-c("(Intercept)", nombres_filas)
+  colnames(dataframe_resultados)<-"instante_actual"
+  
+  x<-obs_anteriores+1
+  
+  temperatura_interior_pred<-predict(arx)
+  temperatura_interior_med<-
+    dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+  
+  for (i in 1:nrow(dataframe_resultados)){
+    for (j in 1:length(arx$coefficients)){
+      if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
+        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+      }
+    }
+    if (rownames(dataframe_resultados)[i] == "R2"){
+      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+    }
+    if (rownames(dataframe_resultados)[i] == "MAE"){
+      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+                                                   temperatura_interior_pred)
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# Reducción del ARX según la significatividad de las variables (cuando una
+# variable es significativa para un paso de tiempo, se considera significativa
+# para los pasos de tiempo restantes hasta el actual)
+
+{
+  for (j in obs_anteriores:0){
+    exit=0
+    if (j==obs_anteriores){
+      for (i in 1:length(names(arx$coefficients))){
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final,final)==obs_anteriores){
+          if (a[["coefficients"]][i,4]>0.05){
+            quitar<-names(arx$coefficients[i])
+            formula<-gsub(quitar, "", formula)
+          }else{
+            dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
+          }
+        }
+      }
+      
+    }else if (j<obs_anteriores & j>0){
+      for (i in 1:length(names(arx$coefficients))){
+        exit<-0
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final-1,final) == paste("_", 
+                                                                         j, 
+                                                                         sep="")){
+          if (a[["coefficients"]][i,4]>0.05){
+            for (k in 1:length(dejadas)){
+              if (substring(names(arx$coefficients[i]),1,final-2) == dejadas[k]){
+                exit<-1
+              }
+            }
+            if (exit!=1){
+              quitar<-names(arx$coefficients[i])
+              formula<-gsub(quitar, "", formula)
+            }
+          }else{
+            dejadas<-c(dejadas, substring(names(arx$coefficients)[i],1,final-2))
+          }
+        }
+      }
+      
+    }else if (j==0){
+      for (i in 1:length(names(arx$coefficients))){
+        final<-nchar(names(arx$coefficients)[i])
+        if (substring(names(arx$coefficients[i]),final-1,final-1) != "_"){
+          exit<-0
+          if (a[["coefficients"]][i,4]>0.05){
+            for (k in 1:length(dejadas)){
+              if (names(arx$coefficients[i])==dejadas[k]){
+                exit<-1
+              }
+            }
+            if (exit!=1){
+              quitar<-names(arx$coefficients[i])
+              formula<-gsub(quitar, " ", formula)
+            }
+          }
+        }
+      }
+    }
+    
+    final<-nchar(formula)
+    while (substring(formula, final, final) == " " || 
+           substring(formula, final, final) == "+"){
+      formula<-substring(formula, 1, final-1)
+      final<-final-1
+    }
+    
+    attach(dataframe_trabajo)
+    arx<-lm(formula)
+    detach(dataframe_trabajo)
+    a<-summary(arx)
+    
+    x<-obs_anteriores+1
+    
+    temperatura_interior_pred<-predict(arx)
+    temperatura_interior_med<-
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    dataframe_resultados$mas<-NA
+    
+    for (i in 1:nrow(dataframe_resultados)){
+      for (k in 1:length(arx$coefficients)){
+        if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[k]){
+          dataframe_resultados$mas[i]<-arx$coefficients[k]
+        }
+      }
+      if (rownames(dataframe_resultados)[i] == "R2"){
+        dataframe_resultados$mas[i]<-summary(arx)$r.squared
+      }
+      if (rownames(dataframe_resultados)[i] == "MAE"){
+        dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
+                                         temperatura_interior_pred)
+      }
+    }
+    j<-which(names(dataframe_resultados) == "mas")
+    nombre_columna<-paste("iteracion", "_", j, sep="")
+    colnames(dataframe_resultados)[j]<-nombre_columna
+  } 
+}
+
+#-------------------------------------------------------------------------------
+
+# Exportar el dataframe de resultados a archivo csv
+
+write.csv2(dataframe_resultados, 
+           paste(wd,"/output/dataframe_resultados_8.csv", sep=""))
 
 #===============================================================================
