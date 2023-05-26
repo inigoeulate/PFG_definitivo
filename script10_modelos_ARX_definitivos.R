@@ -36,7 +36,11 @@ library(Metrics)
 # Obtención del dataframe
 #-------------------------------------------------------------------------------
 
-dataframe_60<-readRDS(paste(wd, "/rds_files/dataframe_60.rds", sep=""))
+{
+  wd<-getwd()
+  
+  dataframe_60<-readRDS(paste(wd, "/rds_files/dataframe_60.rds", sep=""))
+}
 
 #===============================================================================
 
@@ -124,8 +128,9 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
-  rownames(dataframe_resultados)<-nombres_filas
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  rownames(dataframe_resultados)<-c(nombres_filas, 
+                                    "Signif. parám. menos signif.")
   colnames(dataframe_resultados)<-"instante_actual"
 }
 
@@ -168,6 +173,14 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
+    significancia_min<-0
+    
+    for (i in 1:length(arx$coefficients)){
+      if (a[["coefficients"]][i,4] > significancia_min){
+        significancia_min<-a[["coefficients"]][i,4]
+      }
+    }
+    
     if (j==0){
       for (i in 1:nrow(dataframe_resultados)){
         for (k in 1:length(names(arx$coefficients))){
@@ -181,6 +194,9 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
         if (rownames(dataframe_resultados)[i] == "MAE"){
           dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
                                                        temperatura_interior_pred)
+        }
+        if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+          dataframe_resultados$instante_actual[i]<-significancia_min
         }
       }
     } else {
@@ -200,6 +216,9 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
           dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
                                            temperatura_interior_pred)
         }
+        if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+          dataframe_resultados[i,j+1]<-significancia_min
+        }
       }
     }
   } 
@@ -217,7 +236,7 @@ write.csv2(dataframe_resultados,
 # Limpieza de variables
 
 rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
-   temperatura_interior_med, temperatura_interior_pred, x)
+   temperatura_interior_med, temperatura_interior_pred, x, significancia_min)
 
 #===============================================================================
 
@@ -458,8 +477,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
-  rownames(dataframe_resultados)<-nombres_filas
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  rownames(dataframe_resultados)<-c(nombres_filas, 
+                                    "Signif. parám. menos signif.")
   colnames(dataframe_resultados)<-"instante_actual" 
 }
 
@@ -474,6 +494,14 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
   temperatura_interior_med<-
     dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
   
+  significancia_min<-0
+  
+  for (i in 1:length(arx$coefficients)){
+    if (a[["coefficients"]][i,4] > significancia_min){
+      significancia_min<-a[["coefficients"]][i,4]
+    }
+  }
+  
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
       if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
@@ -486,6 +514,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
     if (rownames(dataframe_resultados)[i] == "MAE"){
       dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
                                                    temperatura_interior_pred)
+    }
+    if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+      dataframe_resultados$instante_actual[i]<-significancia_min
     }
   }
 }
@@ -524,6 +555,12 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
     
     dataframe_resultados$mas<-NA
     
+    for (i in 1:length(arx$coefficients)){
+      if (a[["coefficients"]][i,4] > significancia_min){
+        significancia_min<-a[["coefficients"]][i,4]
+      }
+    }
+    
     for (i in 1:nrow(dataframe_resultados)){
       for (k in 1:length(arx$coefficients)){
         if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[k]){
@@ -536,6 +573,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
       if (rownames(dataframe_resultados)[i] == "MAE"){
         dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
                                          temperatura_interior_pred)
+      }
+      if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+        dataframe_resultados$mas[i]<-significancia_min
       }
     }
     l<-which(names(dataframe_resultados) == "mas")
@@ -556,7 +596,8 @@ write.csv2(dataframe_resultados,
 # Limpieza de variables
 
 rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
-   nombre_var, quitar, temperatura_interior_med, temperatura_interior_pred, x)
+   nombre_var, quitar, temperatura_interior_med, temperatura_interior_pred, x,
+   significancia_min)
 
 #===============================================================================
 
@@ -766,8 +807,10 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
-  rownames(dataframe_resultados)<-c("(Intercept)",nombres_filas)
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+2))
+  rownames(dataframe_resultados)<-c("(Intercept)",
+                                    nombres_filas,
+                                    "Signif. parám. menos signif.")
   colnames(dataframe_resultados)<-"instante_actual"
 }
 
@@ -810,6 +853,14 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
+    significancia_min<-0
+    
+    for (i in 1:length(arx$coefficients)){
+      if (a[["coefficients"]][i,4] > significancia_min){
+        significancia_min<-a[["coefficients"]][i,4]
+      }
+    }
+    
     if (j==0){
       for (i in 1:nrow(dataframe_resultados)){
         for (k in 1:length(names(arx$coefficients))){
@@ -823,6 +874,9 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
         if (rownames(dataframe_resultados)[i] == "MAE"){
           dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
                                                        temperatura_interior_pred)
+        }
+        if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+          dataframe_resultados$instante_actual[i]<-significancia_min
         }
       }
     } else {
@@ -842,6 +896,9 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
           dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
                                            temperatura_interior_pred)
         }
+        if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+          dataframe_resultados[i,j+1]<-significancia_min
+        }
       }
     }
   } 
@@ -859,7 +916,7 @@ write.csv2(dataframe_resultados,
 # Limpieza de variables
 
 rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
-   temperatura_interior_med, temperatura_interior_pred, x)
+   temperatura_interior_med, temperatura_interior_pred, x, significancia_min)
 
 #===============================================================================
 
@@ -1102,8 +1159,10 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
-  rownames(dataframe_resultados)<-c("(Intercept)", nombres_filas)
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+2))
+  rownames(dataframe_resultados)<-c("(Intercept)", 
+                                    nombres_filas,
+                                    "Signif. parám. menos signif.")
   colnames(dataframe_resultados)<-"instante_actual" 
 }
 
@@ -1118,6 +1177,14 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
   temperatura_interior_med<-
     dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
   
+  significancia_min<-0
+  
+  for (i in 1:length(arx$coefficients)){
+    if (a[["coefficients"]][i,4] > significancia_min){
+      significancia_min<-a[["coefficients"]][i,4]
+    }
+  }
+  
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
       if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
@@ -1130,6 +1197,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
     if (rownames(dataframe_resultados)[i] == "MAE"){
       dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
                                                    temperatura_interior_pred)
+    }
+    if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+      dataframe_resultados$instante_actual[i]<-significancia_min
     }
   }
 }
@@ -1166,6 +1236,14 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
+    significancia_min<-0
+    
+    for (i in 1:length(arx$coefficients)){
+      if (a[["coefficients"]][i,4] > significancia_min){
+        significancia_min<-a[["coefficients"]][i,4]
+      }
+    }
+    
     dataframe_resultados$mas<-NA
     
     for (i in 1:nrow(dataframe_resultados)){
@@ -1180,6 +1258,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
       if (rownames(dataframe_resultados)[i] == "MAE"){
         dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
                                          temperatura_interior_pred)
+      }
+      if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+        dataframe_resultados$mas[i]<-significancia_min
       }
     }
     l<-which(names(dataframe_resultados) == "mas")
@@ -1200,7 +1281,8 @@ write.csv2(dataframe_resultados,
 # Limpieza de variables
 
 rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
-   nombre_var, quitar, temperatura_interior_med, temperatura_interior_pred, x)
+   nombre_var, quitar, temperatura_interior_med, temperatura_interior_pred, x,
+   significancia_min)
 
 #===============================================================================
 
@@ -1406,3 +1488,4 @@ rm(a, arx, dataframe_resultados, formula, dejadas, exit, final, i, j, k,
 rm(dataframe_trabajo, grados_margen, nombres_filas, numero_filas,
    obs_anteriores, regresion_output, sampleo, variables_regresion_input,
    wd)
+
