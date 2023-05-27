@@ -108,6 +108,10 @@ library(Metrics)
   numero_filas<-length(names(arx$coefficients))+2
   
   nombres_filas<-c(names(arx$coefficients), "R2", "MAE")
+  
+  prob<-0.05
+  
+  z<-qnorm(prob/2,0,1,lower.tail=FALSE)
 }
 
 #-------------------------------------------------------------------------------
@@ -181,6 +185,9 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
       }
     }
     
+    media<-mean(arx$residuals)
+    desv_tipica<-sd(arx$residuals)
+    
     if (j==0){
       for (i in 1:nrow(dataframe_resultados)){
         for (k in 1:length(names(arx$coefficients))){
@@ -236,7 +243,8 @@ write.csv2(dataframe_resultados,
 # Limpieza de variables
 
 rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
-   temperatura_interior_med, temperatura_interior_pred, x, significancia_min)
+   temperatura_interior_med, temperatura_interior_pred, x, significancia_min,
+   media, desv_tipica)
 
 #===============================================================================
 
@@ -289,6 +297,9 @@ rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
   
   temperatura_interior_pred<-predict(arx)
   temperatura_interior_med<-dataframe_trabajo$temperatura_interior
+  
+  media<-mean(arx$residuals)
+  desv_tipica<-sd(arx$residuals)
   
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
@@ -371,6 +382,9 @@ for (i in 1:obs_anteriores){
   temperatura_interior_med<-
     dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
   
+  media<-mean(arx$residuals)
+  desv_tipica<-sd(arx$residuals)
+  
   nombre_columna<-paste("instante_pasado", i, sep="_")
   dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
   colnames(dataframe_resultados)[i+1]<-nombre_columna
@@ -426,7 +440,7 @@ write.csv2(dataframe_resultados,
 
 rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
    nombre_columna, nombre_var, quitadas, quitar, temperatura_interior_med,
-   temperatura_interior_pred, x)
+   temperatura_interior_pred, x, media, desv_tipica)
 
 #===============================================================================
 
@@ -494,6 +508,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
   temperatura_interior_med<-
     dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
   
+  media<-mean(arx$residuals)
+  desv_tipica<-sd(arx$residuals)
+  
   significancia_min<-0
   
   for (i in 1:length(arx$coefficients)){
@@ -553,6 +570,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
+    media<-mean(arx$residuals)
+    desv_tipica<-sd(arx$residuals)
+    
     dataframe_resultados$mas<-NA
     
     for (i in 1:length(arx$coefficients)){
@@ -597,7 +617,7 @@ write.csv2(dataframe_resultados,
 
 rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
    nombre_var, quitar, temperatura_interior_med, temperatura_interior_pred, x,
-   significancia_min)
+   significancia_min, media, desv_tipica)
 
 #===============================================================================
 
@@ -658,6 +678,9 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
   temperatura_interior_pred<-predict(arx)
   temperatura_interior_med<-
     dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+  
+  media<-mean(arx$residuals)
+  desv_tipica<-sd(arx$residuals)
   
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
@@ -758,6 +781,9 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
+    media<-mean(arx$residuals)
+    desv_tipica<-sd(arx$residuals)
+    
     dataframe_resultados$mas<-NA
     
     for (i in 1:nrow(dataframe_resultados)){
@@ -793,7 +819,7 @@ write.csv2(dataframe_resultados,
 
 rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
    nombre_columna, nombre_var, quitar, temperatura_interior_med,
-   temperatura_interior_pred, x)
+   temperatura_interior_pred, x, media, desv_tipica)
 
 #===============================================================================
 
@@ -852,6 +878,9 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
     temperatura_interior_pred<-predict(arx)
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+    
+    media<-mean(arx$residuals)
+    desv_tipica<-sd(arx$residuals)
     
     significancia_min<-0
     
@@ -916,7 +945,8 @@ write.csv2(dataframe_resultados,
 # Limpieza de variables
 
 rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
-   temperatura_interior_med, temperatura_interior_pred, x, significancia_min)
+   temperatura_interior_med, temperatura_interior_pred, x, significancia_min,
+   media, desv_tipica)
 
 #===============================================================================
 
@@ -969,6 +999,9 @@ rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
   
   temperatura_interior_pred<-predict(arx)
   temperatura_interior_med<-dataframe_trabajo$temperatura_interior
+  
+  media<-mean(arx$residuals)
+  desv_tipica<-sd(arx$residuals)
   
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
@@ -1052,6 +1085,9 @@ for (i in 1:obs_anteriores){
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
+    media<-mean(arx$residuals)
+    desv_tipica<-sd(arx$residuals)
+    
     nombre_columna<-paste("instante_pasado", i, sep="_")
     dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
     colnames(dataframe_resultados)[i+1]<-nombre_columna
@@ -1108,7 +1144,7 @@ write.csv2(dataframe_resultados,
 
 rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
    nombre_columna, nombre_var, quitadas, quitar, temperatura_interior_med,
-   temperatura_interior_pred, x)
+   temperatura_interior_pred, x, media, desv_tipica)
 
 #===============================================================================
 
@@ -1177,6 +1213,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
   temperatura_interior_med<-
     dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
   
+  media<-mean(arx$residuals)
+  desv_tipica<-sd(arx$residuals)
+  
   significancia_min<-0
   
   for (i in 1:length(arx$coefficients)){
@@ -1236,6 +1275,9 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
+    media<-mean(arx$residuals)
+    desv_tipica<-sd(arx$residuals)
+    
     significancia_min<-0
     
     for (i in 1:length(arx$coefficients)){
@@ -1282,7 +1324,7 @@ write.csv2(dataframe_resultados,
 
 rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
    nombre_var, quitar, temperatura_interior_med, temperatura_interior_pred, x,
-   significancia_min)
+   significancia_min, media, desv_tipica)
 
 #===============================================================================
 
@@ -1343,6 +1385,9 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
   temperatura_interior_pred<-predict(arx)
   temperatura_interior_med<-
     dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
+  
+  media<-mean(arx$residuals)
+  desv_tipica<-sd(arx$residuals)
   
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
@@ -1443,6 +1488,9 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
     temperatura_interior_med<-
       dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
+    media<-mean(arx$residuals)
+    desv_tipica<-sd(arx$residuals)
+    
     dataframe_resultados$mas<-NA
     
     for (i in 1:nrow(dataframe_resultados)){
@@ -1478,7 +1526,7 @@ write.csv2(dataframe_resultados,
 
 rm(a, arx, dataframe_resultados, formula, dejadas, exit, final, i, j, k,
    nombre_columna, nombre_var, quitar, temperatura_interior_med,
-   temperatura_interior_pred, x)
+   temperatura_interior_pred, x, media, desv_tipica)
 
 #===============================================================================
 
@@ -1487,5 +1535,5 @@ rm(a, arx, dataframe_resultados, formula, dejadas, exit, final, i, j, k,
 
 rm(dataframe_trabajo, grados_margen, nombres_filas, numero_filas,
    obs_anteriores, regresion_output, sampleo, variables_regresion_input,
-   wd)
+   wd, prob, z)
 
