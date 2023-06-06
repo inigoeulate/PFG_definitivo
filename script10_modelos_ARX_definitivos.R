@@ -34,21 +34,12 @@ library(Metrics)
 
 #===============================================================================
 # Obtención del dataframe
+# Nos centramos en el modelo con sampleo de 60 minutos
 #-------------------------------------------------------------------------------
 
 {
   wd<-getwd()
   
-  dataframe_60<-readRDS(paste(wd, "/rds_files/dataframe_60.rds", sep=""))
-}
-
-#===============================================================================
-
-#===============================================================================
-# Nos centramos en el modelo con sampleo de 60 minutos
-#-------------------------------------------------------------------------------
-
-{
   sampleo<-60
   
   horas_anteriores<-6
@@ -57,8 +48,11 @@ library(Metrics)
   
   rm(horas_anteriores)
   
-  nombre_dataframe<-paste("dataframe", sampleo, sep="_")
-  dataframe_trabajo<-get(nombre_dataframe) 
+  dataframe_trabajo<-readRDS(paste(wd, 
+                                   "/rds_files/dataframe_", 
+                                   sampleo, 
+                                   ".rds", 
+                                   sep=""))
 }
 
 #===============================================================================

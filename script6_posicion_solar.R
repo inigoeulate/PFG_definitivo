@@ -161,7 +161,7 @@ dataset<-cbind(dataset,altura,cenit,acimut)
 
 # Limpieza de variables
 
-rm(acimut, altura, angulo_horario, B, cenit, cociente, declinacion,d iferencia,
+rm(acimut, altura, angulo_horario, B, cenit, cociente, declinacion, diferencia,
    i, latitud)
 
 #===============================================================================

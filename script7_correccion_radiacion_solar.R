@@ -115,7 +115,6 @@ dataset<-cbind(dataset, radiacion_global_fachada, radiacion_difusa,
   
   write.csv2(dataset_solar, paste(wd,"/datasets/room4_var_solar.csv",sep=""), 
              row.names=FALSE) 
-
 }
 
 #-------------------------------------------------------------------------------
@@ -127,6 +126,29 @@ dataset<-cbind(dataset, radiacion_global_fachada, radiacion_difusa,
   
   write.csv2(dataset, paste(wd, "/datasets/room4_5.csv", sep=""), 
              row.names=FALSE) 
+}
+
+#-------------------------------------------------------------------------------
+
+# Correlaciones tras el ajuste de la radiación solar
+
+{
+  nombres<-names(dataset)
+  nombres
+  
+  # Coeficientes de correlación de Pearson
+  matrizcorrel<-(cor(dataset[,nombres %in% nombres[c(5, 29, 43, 41)]], 
+                     method="pearson"))
+  write.csv2(matrizcorrel, 
+             paste(wd,"/correlations/matriz_correlaciones_solar.csv", sep=""))
+  
+  # Graficación de las señales, unas con respecto a otras
+  plot(dataset[,nombres %in% nombres[c(5, 29, 43, 41)]])
+  
+  png(filename=paste(wd,"/correlations/correlaciones_solar.png", sep=""), 
+      width=800, height=800)
+  plot(dataset[,nombres %in% nombres[c(5, 29, 43, 41)]])
+  dev.off()
 }
 
 #-------------------------------------------------------------------------------
@@ -187,16 +209,19 @@ dataset$hora_solar<-as.POSIXct(strftime(dataset$hora_solar,
 {
   png(paste(wd,"/plots/dia_alta_radiacion.png",sep=""), width=800, height=800)
   plot(dia10$hora_solar, dia10$radiacion_solar_global_horizontal,
-       xlab="hora", ylab="radiación [W/m2]",col="red",cex=1.5,
+       xlab="Hora solar", ylab="Radiación [W/m2]",col="blue",cex=1.5,
        ylim=c(min(dia10$radiacion_solar_global_horizontal),
               max(dia10$radiacion_solar_global_horizontal)))
-  points(dia10$hora_solar, dia10$radiacion_difusa, col="blue", cex=1.5)
-  points(dia10$hora_solar, dia10$radiacion_directa_fachada, col="yellow", 
+  points(dia10$hora_solar, dia10$radiacion_difusa, col="yellow", cex=1.5)
+  points(dia10$hora_solar, dia10$radiacion_directa_fachada, col="orange", 
+         cex=1.5)
+  points(dia10$hora_solar, dia10$radiacion_global_fachada, col="red", 
          cex=1.5)
   legend(x="topleft", legend=c("Radiación solar global horizontal", 
-                               "Radiación difusa",
-                               "Radiación directa s/ fachada"),
-         col=c("red", "blue", "yellow"),
+                               "Radiación solar difusa",
+                               "Radiación solar directa sobre fachada",
+                               "Radiación solar global sobre fachada"),
+         col=c("blue", "yellow", "orange", "red"),
          lty=c(1, 1, 1, 1),
          cex=1.4)
   dev.off()
@@ -246,17 +271,20 @@ dia13<-dataset[comienzo:final,]
 {
   png(paste(getwd(),"/plots/dia_baja_radiacion.png",sep=""), width=800, 
       height=800)
-  plot(dia13$hora_solar, dia13$radiacion_solar_global_horizontal, xlab="hora",
-       ylab="radiación [W/m2]",col="red",cex=1.5,
+  plot(dia13$hora_solar, dia13$radiacion_solar_global_horizontal, 
+       xlab="Hora solar", ylab="Radiación [W/m2]",col="blue",cex=1.5,
        ylim=c(min(dia10$radiacion_solar_global_horizontal),
               max(dia10$radiacion_solar_global_horizontal)))
-  points(dia13$hora_solar, dia13$radiacion_difusa, col="blue", cex=1.5)
-  points(dia13$hora_solar, dia13$radiacion_directa_fachada, col="yellow", 
+  points(dia13$hora_solar, dia13$radiacion_difusa, col="yellow", cex=1.5)
+  points(dia13$hora_solar, dia13$radiacion_directa_fachada, col="orange", 
+         cex=1.5)
+  points(dia13$hora_solar, dia13$radiacion_global_fachada, col="red", 
          cex=1.5)
   legend(x="topleft", legend=c("Radiación solar global horizontal", 
-                               "Radiación difusa",
-                               "Radiación directa s/ fachada"),
-         col=c("red", "blue", "yellow"),
+                               "Radiación solar difusa",
+                               "Radiación solar directa sobre fachada",
+                               "Radiación solar global sobre fachada"),
+         col=c("blue", "yellow", "orange", "red"),
          lty=c(1, 1, 1, 1),
          cex=1.4)
   dev.off()
@@ -270,6 +298,6 @@ rm(acimut, acimut_aparente, acimut_plano, altura, cenit, comienzo, final, exit,
    i, j, hora_solar, marca_tiempo, radiacion_difusa, radiacion_directa_fachada,
    radiacion_directa_horizontal, radiacion_directa_perpendicular, 
    radiacion_global_fachada, radiacion_solar_global_horizontal, dia10, dia13,
-   dataset_solar)
+   dataset_solar, nombres, matrizcorrel)
 
 #===============================================================================

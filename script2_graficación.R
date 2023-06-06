@@ -15,6 +15,23 @@
 #===============================================================================
 
 #===============================================================================
+# Carga de librerías
+#-------------------------------------------------------------------------------
+
+# Librería "lubridate" que introduce funciones para facilitar el manejo de
+# fechas.
+
+library(lubridate)
+
+#-------------------------------------------------------------------------------
+
+# Librería "itsadug" que permite hacer leyendas con más facilidad
+
+library(itsadug)
+
+#===============================================================================
+
+#===============================================================================
 # Obtención del dataset
 #-------------------------------------------------------------------------------
 
@@ -59,14 +76,14 @@ dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
   dev.off()
   
   plot(subset$marca_tiempo, subset$ocupantes_conteo, 
-       xlab="Hora", ylab="Presencia de ocupantes",
+       xlab="Hora", ylab="Número de ocupantes",
        ylim=c(min(dataset$ocupantes_conteo),
               max(dataset$ocupantes_conteo)))
   
   png(paste(wd,"/plots/ocupantes_conteo_primer_dia.png",sep=""), 
       width=800, height=800)
   plot(subset$marca_tiempo, subset$ocupantes_conteo, 
-       xlab="Hora", ylab="Presencia de ocupantes",
+       xlab="Hora", ylab="Número de ocupantes",
        ylim=c(min(dataset$ocupantes_conteo),
               max(dataset$ocupantes_conteo)))
   dev.off()
@@ -266,8 +283,111 @@ rm(i,exit, subset)
 
 #-------------------------------------------------------------------------------
 
+# Graficación con respecto a la hora
+
+{
+  
+  hora<-hour(dataset$marca_tiempo)
+  
+  plot(hora, 
+       dataset$temperatura_interior,
+       xlab="Hora", ylab="Temperatura interior [ºC]")
+  abline(v=12, col="red", lwd=4)
+  
+  png(paste(wd,"/plots/hora_vs_temperatura_interior.png",sep=""), 
+      width=800, height=800)
+  plot(hora, 
+       dataset$temperatura_interior,
+       xlab="Hora", ylab="Temperatura interior [ºC]")
+  abline(v=12, col="red", lwd=4)
+  dev.off()
+  
+  plot(hora, 
+       dataset$temperatura_exterior,
+       xlab="Hora", ylab="Temperatura exterior [ºC]")
+  abline(v=12, col="red", lwd=4)
+  
+  png(paste(wd,"/plots/hora_vs_temperatura_exterior.png",sep=""), 
+      width=800, height=800)
+  plot(hora, 
+       dataset$temperatura_exterior,
+       xlab="Hora", ylab="Temperatura exterior [ºC]")
+  abline(v=12, col="red", lwd=4)
+  dev.off()
+  
+  plot(hora, 
+       dataset$energia_agua_refrigerada,
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]")
+  abline(v=12, col="red", lwd=4)
+  
+  png(paste(wd,"/plots/hora_vs_energia_agua_refrigerada.png",sep=""), 
+      width=800, height=800)
+  plot(hora, 
+       dataset$energia_agua_refrigerada,
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]")
+  abline(v=12, col="red", lwd=4)
+  dev.off()
+  
+  plot(hora, 
+       dataset$radiacion_solar_global_horizontal,
+       xlab="Hora", ylab="Radiación solar global horizontal [W/m2]")
+  abline(v=12, col="red", lwd=4)
+  
+  png(paste(wd,"/plots/hora_vs_radiacion_solar_global_horizontal.png",sep=""), 
+      width=800, height=800)
+  plot(hora, 
+       dataset$radiacion_solar_global_horizontal,
+       xlab="Hora", ylab="Radiación solar global horizontal [W/m2]")
+  abline(v=12, col="red", lwd=4)
+  dev.off() 
+}
+
+
+#-------------------------------------------------------------------------------
+
+#===============================================================================
+
+#===============================================================================
+# Graficación de:
+  # - Hora
+  # - Carga térmica (energía de agua refrigerada)
+  # - Temperatura exterior
+#-------------------------------------------------------------------------------
+
+{
+  norm_temp_ext<-(dataset$temperatura_exterior-min(dataset$temperatura_exterior))/
+    (max(dataset$temperatura_exterior-min(dataset$temperatura_exterior)))
+  
+  color_palette<-colorRampPalette(colors=c("blue", "red"))(length(norm_temp_ext))   
+  
+  plot(hora, dataset$energia_agua_refrigerada, col=color_palette,
+       ylim=c(min(dataset$energia_agua_refrigerada),
+              max(dataset$energia_agua_refrigerada)+1.5),
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]")
+  gradientLegend(valRange=c(min(dataset$temperatura_exterior), 
+                            max(dataset$temperatura_exterior)),
+                 color=color_palette, nCol = 100, pos = 0.5, side = 3,
+                 length = 0.8, depth = 0.1, inside = TRUE, coords = FALSE,
+                 pos.num = NULL, n.seg = 3, border.col = "black", dec = 2)
+  
+  png(paste(wd,"/plots/hora_vs_carga_vs_temperatura_ext.png",sep=""), 
+      width=800, height=800)
+  plot(hora, dataset$energia_agua_refrigerada, col=color_palette,
+       ylim=c(min(dataset$energia_agua_refrigerada),
+              max(dataset$energia_agua_refrigerada)+1.5),
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]")
+  gradientLegend(valRange=c(min(dataset$temperatura_exterior), 
+                            max(dataset$temperatura_exterior)),
+                 color=color_palette, nCol = 100, pos = 0.5, side = 3,
+                 length = 0.8, depth = 0.1, inside = TRUE, coords = FALSE,
+                 pos.num = NULL, n.seg = 3, border.col = "black", dec = 2)
+  dev.off() 
+}
+
+#-------------------------------------------------------------------------------
+
 # Limpieza de variables
 
-rm(comienzo, final, diferencia, exit, i)
+rm(comienzo, final, diferencia, exit, i, hora, color_palette, norm_temp_ext)
 
 #===============================================================================

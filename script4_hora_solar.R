@@ -44,18 +44,18 @@ library(lubridate)
 # hora solar-hora estándar = 4·(L_st - L_loc) + E
 
 # En esta expresión:
-# L_st es el meridiano estándar para la zona horaria local.
-# L_loc es la longitud de la localización en cuestión.
-# E es la ecuación del tiempo en minutos.
+  # L_st es el meridiano estándar para la zona horaria local.
+  # L_loc es la longitud de la localización en cuestión.
+  # E es la ecuación del tiempo en minutos.
 
 # La ecuación del tiempo en minutos se define como:
-# E=229.2·(0.000075+0.001868·cos⁡B-0.032077·sin⁡B-0.014615·cos⁡2B-0.04089·sin⁡2B )
-# B=(n-1)·360/365
-# 1≤n≤365
+  # E=229.2·(0.000075+0.001868·cos⁡B-0.032077·sin⁡B-0.014615·cos⁡2B-0.04089·sin⁡2B )
+    # B=(n-1)·360/365
+      # 1≤n≤365
 
 #En estas expresiones:
-# n es el día del año.
-# Las unidades de B son grados angulares.
+  # n es el día del año.
+  # Las unidades de B son grados angulares.
 
 # Los husos horarios están centrados en meridianos de longitudes múltiplos de 15°
 # El huso horario conocido como UTC+0 (Coordinated Universal Time) está centrado
@@ -64,10 +64,9 @@ library(lubridate)
 # y así sucesivamente. 
 
 #El edificio que estamos estudiando se encuentra en Singapur. 
-# Uso horario: UTC+8.
-# Singapur no cambia de hora con motivo de las estaciones.
-
-# Coordenadas del edificio: 1.28967°N, 103.85007°E.
+  # Uso horario: UTC+8.
+  # Singapur no cambia de hora con motivo de las estaciones.
+  # Coordenadas del edificio: 1.28967°N, 103.85007°E.
 
 #-------------------------------------------------------------------------------
 
@@ -77,8 +76,8 @@ library(lubridate)
 # debería.
 
 # Por lo tanto, se considera:
-# L_st: longitud de la localización en cuestión.
-# L_loc: longitud meridiano estándar para la zona horaria local.
+  # L_st: longitud de la localización en cuestión.
+  # L_loc: longitud meridiano estándar para la zona horaria local.
 
 {
   L_loc<-8*15

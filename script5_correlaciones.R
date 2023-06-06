@@ -15,6 +15,17 @@
 #===============================================================================
 
 #===============================================================================
+# Carga de librerías
+#-------------------------------------------------------------------------------
+
+# Librería "lubridate" que introduce funciones para facilitar el manejo de
+# fechas.
+
+library(lubridate)
+
+#===============================================================================
+
+#===============================================================================
 # Obtención del dataset
 #-------------------------------------------------------------------------------
 
@@ -27,77 +38,35 @@ dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
 #-------------------------------------------------------------------------------
 
 # Correlaciones entre las variables:
-  # a. Temperatura ambiental exterior, temperatura ambiental interior y número
-  #    de personas
-  # b. Temperatura ambiental exterior, radiación solar, número de personas y
-  #    consumo de climatización
-  # c. Temperatura ambiental exterior, radiación solar, hora solar y consumo de
-  #    climatización
+  # - Temperatura interior
+  # - Temperatura exterior
+  # - Radiación solar global horizontal
+  # - Ocupación por conteo
+  # - Energía agua refrigerada
 
 {
-  hora<-hour(dataset$hora_solar)
-  dataset<-cbind(dataset, hora)
-  
   nombres<-names(dataset)
   nombres
   
-  # a. Temperatura ambiental exterior, temperatura ambiental interior y número de
-  # personas
-  
   # Coeficientes de correlación de Pearson
-  matrizcorrel1<-(cor(dataset[,nombres %in% nombres[c(28,5,36)]]))
-  write.csv2(matrizcorrel1, 
-             paste(wd,"/correlations/matriz_correlaciones1.csv", sep=""))
+  matrizcorrel<-(cor(dataset[,nombres %in% nombres[c(5, 28, 29, 36, 13)]], 
+                     method="pearson"))
+  write.csv2(matrizcorrel, 
+             paste(wd,"/correlations/matriz_correlaciones.csv", sep=""))
   
   # Graficación de las señales, unas con respecto a otras
-  plot(dataset[,nombres %in% nombres[c(28,5,36)]])
-  png(filename=paste(wd,"/correlations/correlaciones1.png", sep=""), 
+  plot(dataset[,nombres %in% nombres[c(5, 28, 29, 36, 13)]])
+  
+  png(filename=paste(wd,"/correlations/correlaciones.png", sep=""), 
       width=800, height=800)
-  plot(dataset[,nombres %in% nombres[c(28,5,36)]])
-  dev.off()
-  
-  # b. Temperatura ambiental exterior, radiación solar, número de personas y
-  # consumo de climatización
-  
-  # Coeficientes de correlación de Pearson
-  matrizcorrel2<-(cor(dataset[,nombres %in% nombres[c(28,29,36,13)]]))
-  write.csv2(matrizcorrel2, 
-             paste(wd,"/correlations/matriz_correlaciones2.csv", sep=""))
-  
-  # Graficación de las señales, unas con respecto a otras
-  plot(dataset[,nombres %in% nombres[c(28,29,36,13)]])
-  png(filename=paste(wd,"/correlations/correlaciones2.png", sep=""), 
-      width=800, height=800)
-  plot(dataset[,nombres %in% nombres[c(28,29,36,13)]])
-  dev.off()
-  
-  # c. Temperatura ambiental exterior, radiación solar, hora solar y consumo de
-  # climatización
-  
-  # Coeficientes de correlación de Pearson
-  matrizcorrel3<-(cor(dataset[,nombres %in% nombres[c(28,29,38,13)]]))
-  write.csv2(matrizcorrel3, 
-             paste(wd,"/correlations/matriz_correlaciones3.csv", sep=""))
-  
-  # Graficación de las señales, unas con respecto a otras
-  plot(dataset[,nombres %in% nombres[c(28,29,38,13)]])
-  png(filename=paste(wd,"/correlations/correlaciones3.png", sep=""), 
-      width=800, height=800)
-  plot(dataset[,nombres %in% nombres[c(28,29,38,13)]])
+  plot(dataset[,nombres %in% nombres[c(5, 28, 29, 36, 13)]])
   dev.off()
 }
 
 #-------------------------------------------------------------------------------
 
-# Eliminar del dataset la variable "hora" creada para el cálculo de las
-# correlaciones
-
-dataset<-subset(dataset, select=-hora)
-
-#-------------------------------------------------------------------------------
-
 # Limpiado de variables
 
-rm(matrizcorrel1, matrizcorrel2, matrizcorrel3, hora, nombres)
+rm(matrizcorrel, nombres)
 
 #===============================================================================

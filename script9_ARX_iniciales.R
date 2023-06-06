@@ -25,25 +25,25 @@ library(Metrics)
 
 #===============================================================================
 # Obtención del dataframe
-#-------------------------------------------------------------------------------
-
-dataframe_60<-readRDS(paste(wd, "/rds_files/dataframe_60.rds", sep=""))
-
-#===============================================================================
-
-#===============================================================================
 # Nos centramos en el modelo con sampleo de 60 minutos
 #-------------------------------------------------------------------------------
 
 {
+  wd<-getwd()
+  
   sampleo<-60
   
   horas_anteriores<-6
   
   obs_anteriores<-horas_anteriores*60/sampleo
   
-  nombre_dataframe<-paste("dataframe", sampleo, sep="_")
-  dataframe_trabajo<-get(nombre_dataframe) 
+  rm(horas_anteriores)
+  
+  dataframe_trabajo<-readRDS(paste(wd, 
+                                   "/rds_files/dataframe_", 
+                                   sampleo, 
+                                   ".rds", 
+                                   sep=""))
 }
 
 #===============================================================================
@@ -200,20 +200,28 @@ regresion_output<-"temperatura_interior"
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(temperatura_interior_med-grados_margen),
-               max(temperatura_interior_med+grados_margen)),
-        ylim=c(min(temperatura_interior_pred-grados_margen),
-               max(temperatura_interior_pred+grados_margen)))
+        xlim=c(min(min(temperatura_interior_med-grados_margen),
+                   min(temperatura_interior_pred-grados_margen)),
+               max(max(temperatura_interior_med+grados_margen),
+                   max(temperatura_interior_pred+grados_margen))),
+        ylim=c(min(min(temperatura_interior_med-grados_margen),
+                  min(temperatura_interior_pred-grados_margen)),
+              max(max(temperatura_interior_med+grados_margen),
+                  max(temperatura_interior_pred+grados_margen))))
   
   png(paste(getwd(),"/plots/temp_interior_med_vs_pred_1.png",sep=""), width=800, 
       height=800)
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(temperatura_interior_med-grados_margen),
-               max(temperatura_interior_med+grados_margen)),
-        ylim=c(min(temperatura_interior_pred-grados_margen),
-               max(temperatura_interior_pred+grados_margen)))
+        xlim=c(min(min(temperatura_interior_med-grados_margen),
+                   min(temperatura_interior_pred-grados_margen)),
+               max(max(temperatura_interior_med+grados_margen),
+                   max(temperatura_interior_pred+grados_margen))),
+        ylim=c(min(min(temperatura_interior_med-grados_margen),
+                   min(temperatura_interior_pred-grados_margen)),
+               max(max(temperatura_interior_med+grados_margen),
+                   max(temperatura_interior_pred+grados_margen))))
   dev.off()
   
   dataframe_trabajo$hora_solar<-
@@ -222,8 +230,10 @@ regresion_output<-"temperatura_interior"
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_trabajo)],
        temperatura_interior_med,
        xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
-       ylim=c(min(temperatura_interior_med-grados_margen),
-              max(temperatura_interior_med+grados_margen)))
+       ylim=c(min(min(temperatura_interior_med-grados_margen),
+                  min(temperatura_interior_pred-grados_margen)),
+              max(max(temperatura_interior_med+grados_margen),
+                  max(temperatura_interior_pred+grados_margen))))
   points(dataframe_trabajo$hora_solar[x:nrow(dataframe_trabajo)],
          temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
@@ -239,15 +249,17 @@ regresion_output<-"temperatura_interior"
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_trabajo)],
        temperatura_interior_med,
        xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
-       ylim=c(min(temperatura_interior_med-grados_margen),
-              max(temperatura_interior_med+grados_margen)))
+       ylim=c(min(min(temperatura_interior_med-grados_margen),
+                  min(temperatura_interior_pred-grados_margen)),
+              max(max(temperatura_interior_med+grados_margen),
+                  max(temperatura_interior_pred+grados_margen))))
   points(dataframe_trabajo$hora_solar[x:nrow(dataframe_trabajo)],
          temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
                                "Temperatura interior predicha [ºC]"),
          col=c("red","blue"),
          lty=c(1,1),
-         cex=1.5)
+         cex=0.5)
   dev.off() 
 }
 
@@ -255,48 +267,14 @@ regresion_output<-"temperatura_interior"
 
 # Limpieza de variables
 
-rm(a, arx, dataframe_60, matriz_resultados, formula, horas_anteriores, i, j, k,
-   minimo, nombre_dataframe, nombre_var, quitar, sampleo, 
-   temperatura_interior_med, temperatura_interior_pred, x, y)
+rm(a, arx, matriz_resultados, formula, i, j, k, minimo, nombre_var, quitar, 
+   sampleo, temperatura_interior_med, temperatura_interior_pred, x, y)
 
 #===============================================================================
 
 #===============================================================================
 # Segundo(s) ARX: instante de tiempo actual y se va añadiendo cada vez un
 # instante de tiempo pasado forzando al intercept a ser 0
-#-------------------------------------------------------------------------------
-
-# Normalizado de los datos
-
-{
-  dataframe_trabajo_norm<-na.omit(dataframe_trabajo)
-  
-  for (j in 1:length(dataframe_trabajo_norm)){
-    if (names(dataframe_trabajo_norm[j]) != "marca_tiempo" & 
-        names(dataframe_trabajo_norm[j]) != "hora_solar" &
-        grepl("temperatura",names(dataframe_trabajo_norm[j])) != TRUE){
-      maximo<-max(dataframe_trabajo_norm[, j])
-      minimo<-min(dataframe_trabajo_norm[, j])
-      for (i in 1:nrow(dataframe_trabajo_norm)){
-        dataframe_trabajo_norm[i, j]<-(dataframe_trabajo_norm[i, j]-minimo)/
-          (maximo-minimo)
-      }
-    }
-  }
-}
-
-#-------------------------------------------------------------------------------
-
-# Separación del dataframe en training y testing
-
-{
-  fraccion_train<-3/5
-  longitud<-nrow(dataframe_trabajo_norm)*fraccion_train
-  dataframe_trabajo_norm_train<-dataframe_trabajo_norm[1:longitud,]
-  dataframe_trabajo_norm_test<-
-    dataframe_trabajo_norm[(longitud+1):nrow(dataframe_trabajo_norm),] 
-}
-
 #-------------------------------------------------------------------------------
 
 # Creación del dataframe que contendrá los resultados
@@ -335,14 +313,16 @@ rm(a, arx, dataframe_60, matriz_resultados, formula, horas_anteriores, i, j, k,
       }
     }
     
-    attach(dataframe_trabajo_norm_train)
+    attach(dataframe_trabajo)
     arx<-lm(formula)
-    detach(dataframe_trabajo_norm_train)
+    detach(dataframe_trabajo)
     a<-summary(arx)
     
-    temperatura_interior_pred<-predict(arx, dataframe_trabajo_norm_test)
+    x<-j+1
+    
+    temperatura_interior_pred<-predict(arx)
     temperatura_interior_med<-
-      na.omit(dataframe_trabajo)$temperatura_interior[(longitud+1):nrow(dataframe_trabajo_norm)]
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
     if (j==0){
       for (i in 1:nrow(dataframe_resultados)){
@@ -411,9 +391,9 @@ rm(a, arx, dataframe_60, matriz_resultados, formula, horas_anteriores, i, j, k,
     } 
   }
   
-  attach(dataframe_trabajo_norm_train)
+  attach(dataframe_trabajo)
   arx<-lm(formula)
-  detach(dataframe_trabajo_norm_train)
+  detach(dataframe_trabajo)
   a<-summary(arx)
   
   for (j in pasos_tiempo_pasados:0){
@@ -482,14 +462,16 @@ rm(a, arx, dataframe_60, matriz_resultados, formula, horas_anteriores, i, j, k,
       final<-final-1
     }
     
-    attach(dataframe_trabajo_norm_train)
+    attach(dataframe_trabajo)
     arx<-lm(formula)
-    detach(dataframe_trabajo_norm_train)
+    detach(dataframe_trabajo)
     a<-summary(arx)
     
-    temperatura_interior_pred<-predict(arx, dataframe_trabajo_norm_test)
+    x<-j+1
+    
+    temperatura_interior_pred<-predict(arx)
     temperatura_interior_med<-
-      na.omit(dataframe_trabajo)$temperatura_interior[(longitud+1):nrow(dataframe_trabajo_norm)]
+      dataframe_trabajo$temperatura_interior[x:nrow(dataframe_trabajo)]
     
     dataframe_resultados$mas<-NA
     
@@ -521,33 +503,38 @@ rm(a, arx, dataframe_60, matriz_resultados, formula, horas_anteriores, i, j, k,
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(temperatura_interior_med-grados_margen),
-               max(temperatura_interior_med+grados_margen)),
-        ylim=c(min(temperatura_interior_pred-grados_margen),
-               max(temperatura_interior_pred+grados_margen)))
+        xlim=c(min(min(temperatura_interior_med-grados_margen),
+                   min(temperatura_interior_pred-grados_margen)),
+               max(max(temperatura_interior_med+grados_margen),
+                   max(temperatura_interior_pred+grados_margen))),
+        ylim=c(min(min(temperatura_interior_med-grados_margen),
+                   min(temperatura_interior_pred-grados_margen)),
+               max(max(temperatura_interior_med+grados_margen),
+                   max(temperatura_interior_pred+grados_margen))))
   
   png(paste(getwd(),"/plots/temp_interior_med_vs_pred_2.png",sep=""), width=800, 
       height=800)
-  
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(temperatura_interior_med-grados_margen),
-               max(temperatura_interior_med+grados_margen)),
-        ylim=c(min(temperatura_interior_pred-grados_margen),
-               max(temperatura_interior_pred+grados_margen)))
+        xlim=c(min(min(temperatura_interior_med-grados_margen),
+                   min(temperatura_interior_pred-grados_margen)),
+               max(max(temperatura_interior_med+grados_margen),
+                   max(temperatura_interior_pred+grados_margen))),
+        ylim=c(min(min(temperatura_interior_med-grados_margen),
+                   min(temperatura_interior_pred-grados_margen)),
+               max(max(temperatura_interior_med+grados_margen),
+                   max(temperatura_interior_pred+grados_margen))))
   dev.off()
-  
-  dataframe_trabajo_norm$hora_solar<-
-    as.POSIXct(strftime(dataframe_trabajo_norm$hora_solar,
-                        format = "%Y-%m-%d %H:%M:%OS"))
-  
-  plot(dataframe_trabajo_norm$hora_solar[(longitud+1):nrow(dataframe_trabajo_norm)],
+
+  plot(dataframe_trabajo$hora_solar[pasos_tiempo_pasados+1:nrow(dataframe_trabajo)],
        temperatura_interior_med,
        xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
-       ylim=c(min(temperatura_interior_med-grados_margen),
-              max(temperatura_interior_med+grados_margen)))
-  points(dataframe_trabajo_norm$hora_solar[(longitud+1):nrow(dataframe_trabajo_norm)],
+       ylim=c(min(min(temperatura_interior_med-grados_margen),
+                  min(temperatura_interior_pred-grados_margen)),
+              max(max(temperatura_interior_med+grados_margen),
+                  max(temperatura_interior_pred+grados_margen))))
+  points(dataframe_trabajo$hora_solar[pasos_tiempo_pasados+1:nrow(dataframe_trabajo)],
          temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
                                "Temperatura interior predicha [ºC]"),
@@ -559,18 +546,20 @@ rm(a, arx, dataframe_60, matriz_resultados, formula, horas_anteriores, i, j, k,
             sep=""), 
       width=800, 
       height=800)
-  plot(dataframe_trabajo_norm$hora_solar[(longitud+1):nrow(dataframe_trabajo_norm)],
+  plot(dataframe_trabajo$hora_solar[pasos_tiempo_pasados+1:nrow(dataframe_trabajo)],
        temperatura_interior_med,
        xlab="Marca de tiempo", ylab= "Temperatura [ºC]", col="red", cex=1.5,
-       ylim=c(min(temperatura_interior_med-grados_margen),
-              max(temperatura_interior_med+grados_margen)))
-  points(dataframe_trabajo_norm$hora_solar[(longitud+1):nrow(dataframe_trabajo_norm)],
+       ylim=c(min(min(temperatura_interior_med-grados_margen),
+                  min(temperatura_interior_pred-grados_margen)),
+              max(max(temperatura_interior_med+grados_margen),
+                  max(temperatura_interior_pred+grados_margen))))
+  points(dataframe_trabajo$hora_solar[pasos_tiempo_pasados+1:nrow(dataframe_trabajo)],
          temperatura_interior_pred, col="blue", cex=1.5)
   legend(x="topleft", legend=c("Temperatura interior medida [ºC]",
                                "Temperatura interior predicha [ºC]"),
          col=c("red","blue"),
          lty=c(1,1),
-         cex=1.5)
+         cex=0.5)
   dev.off() 
 }
 
@@ -578,9 +567,7 @@ rm(a, arx, dataframe_60, matriz_resultados, formula, horas_anteriores, i, j, k,
 
 # Limpieza de variables
 
-rm(a, arx, dataframe_resultados, dataframe_trabajo_norm,
-   dataframe_trabajo_norm_test, dataframe_trabajo_norm_train, dejadas, exit,
-   final, formula, fraccion_train, i, j, k, longitud, maximo, minimo,
+rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k, x,
    nombre_columna, nombre_var, temperatura_interior_med,
    temperatura_interior_pred, pasos_tiempo_pasados)
 
