@@ -12,7 +12,7 @@
 # En este décimo script se llevarán a cabo los 8 modelos ARX definitivos.
 #===============================================================================
 # Tras el análisis de los 3 ARX iniciales se llega a la conclusión de que se van
-# a emplear 8 enfoques (2x2x2)
+# a emplear 8 modelos (2x2x2)
   # - Intersección en 0 o libre
   # - Extender el modelo desde el instante inicial hasta el pasado o modelo
   #   completo e ir reduciendo
@@ -101,7 +101,9 @@ library(Metrics)
   
   numero_filas<-length(names(arx$coefficients))+2
   
-  nombres_filas<-c(names(arx$coefficients), "R2", "MAE")
+  nombres_filas<-c("(Intercept)",names(arx$coefficients), "R2", "MAE",
+                   "Media residuales", "Desviación típica residuales",
+                   "Número de variables")
   
   prob<-0.05
   
@@ -117,7 +119,7 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
 #===============================================================================
 
 #===============================================================================
-# Enfoque 1:
+# Modelo 1:
   # Intersección en 0
   # Extensión del modelo desde el instante inicial hasta el pasado
   # Extensión por pasos de tiempo
@@ -126,10 +128,10 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+5))
   rownames(dataframe_resultados)<-c(nombres_filas, 
-                                    "Signif. parám. menos signif.")
-  colnames(dataframe_resultados)<-"instante_actual"
+                                    "p-valor del parámetro menos significativo")
+  colnames(dataframe_resultados)<-"Iteración 1"
 }
 
 #-------------------------------------------------------------------------------
@@ -186,22 +188,34 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
       for (i in 1:nrow(dataframe_resultados)){
         for (k in 1:length(names(arx$coefficients))){
           if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
-            dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
+            dataframe_resultados[i,1]<-arx$coefficients[k]
           }
         }
+        if (rownames(dataframe_resultados)[i] == "Número de variables"){
+          dataframe_resultados[i,1]<-length(arx$coefficients)
+        }
+        if (rownames(dataframe_resultados)[i] == "(Intercept)"){
+          dataframe_resultados[i,1]<-0
+        }
         if (rownames(dataframe_resultados)[i] == "R2"){
-          dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+          dataframe_resultados[i,1]<-summary(arx)$r.squared
         }
         if (rownames(dataframe_resultados)[i] == "MAE"){
-          dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+          dataframe_resultados[i,1]<-mae(temperatura_interior_med,
                                                        temperatura_interior_pred)
         }
-        if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
-          dataframe_resultados$instante_actual[i]<-significancia_min
+        if (rownames(dataframe_resultados)[i] == "p-valor del parámetro menos significativo"){
+          dataframe_resultados[i,1]<-significancia_min
+        }
+        if (rownames(dataframe_resultados)[i] == "Media residuales"){
+          dataframe_resultados[i,1]<-media
+        }
+        if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+          dataframe_resultados[i,1]<-desv_tipica
         }
       }
     } else {
-      nombre_columna<-paste("instante_pasado", j, sep="_")
+      nombre_columna<-paste("Iteración ", j+1, sep="")
       dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
       colnames(dataframe_resultados)[j+1]<-nombre_columna
       for (i in 1:nrow(dataframe_resultados)){
@@ -210,6 +224,12 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
             dataframe_resultados[i,j+1]<-arx$coefficients[k]
           }
         }
+        if (rownames(dataframe_resultados)[i] == "Número de variables"){
+          dataframe_resultados[i,j+1]<-length(arx$coefficients)
+        }
+        if (rownames(dataframe_resultados)[i] == "(Intercept)"){
+          dataframe_resultados[i,j+1]<-0
+        }
         if (rownames(dataframe_resultados)[i] == "R2"){
           dataframe_resultados[i,j+1]<-summary(arx)$r.squared
         }
@@ -217,8 +237,14 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
           dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
                                            temperatura_interior_pred)
         }
-        if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+        if (rownames(dataframe_resultados)[i] == "p-valor del parámetro menos significativo"){
           dataframe_resultados[i,j+1]<-significancia_min
+        }
+        if (rownames(dataframe_resultados)[i] == "Media residuales"){
+          dataframe_resultados[i,j+1]<-media
+        }
+        if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+          dataframe_resultados[i,j+1]<-desv_tipica
         }
       }
     }
@@ -243,7 +269,7 @@ rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
 #===============================================================================
 
 #===============================================================================
-# Enfoque 2:
+# Modelo 2:
   # Intersección en 0
   # Extensión del modelo desde el instante inicial hasta el pasado
   # Extensión por identificación de variable más relevante
@@ -278,9 +304,9 @@ rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+4))
   rownames(dataframe_resultados)<-nombres_filas
-  colnames(dataframe_resultados)<-"instante_actual" 
+  colnames(dataframe_resultados)<-"Iteración 1" 
 }
 
 #-------------------------------------------------------------------------------
@@ -298,15 +324,27 @@ rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
       if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
-        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+        dataframe_resultados[i,1]<-arx$coefficients[j]
       }
     }
+    if (rownames(dataframe_resultados)[i] == "Número de variables"){
+      dataframe_resultados[i,1]<-length(arx$coefficients)
+    }
+    if (rownames(dataframe_resultados)[i] == "(Intercept)"){
+      dataframe_resultados[i,1]<-0
+    }
     if (rownames(dataframe_resultados)[i] == "R2"){
-      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+      dataframe_resultados[i,1]<-summary(arx)$r.squared
     }
     if (rownames(dataframe_resultados)[i] == "MAE"){
-      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+      dataframe_resultados[i,1]<-mae(temperatura_interior_med,
                                                    temperatura_interior_pred)
+    }
+    if (rownames(dataframe_resultados)[i] == "Media residuales"){
+      dataframe_resultados[i,1]<-media
+    }
+    if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+      dataframe_resultados[i,1]<-desv_tipica
     }
   }
 }
@@ -379,7 +417,7 @@ for (i in 1:obs_anteriores){
   media<-mean(arx$residuals)
   desv_tipica<-sd(arx$residuals)
   
-  nombre_columna<-paste("instante_pasado", i, sep="_")
+  nombre_columna<-paste("Iteración ", i+1, sep="")
   dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
   colnames(dataframe_resultados)[i+1]<-nombre_columna
   
@@ -389,12 +427,24 @@ for (i in 1:obs_anteriores){
         dataframe_resultados[j,i+1]<-arx$coefficients[k]
       }
     }
+    if (rownames(dataframe_resultados)[j] == "Número de variables"){
+      dataframe_resultados[j,i+1]<-length(arx$coefficients)
+    }
+    if (rownames(dataframe_resultados)[j] == "(Intercept)"){
+      dataframe_resultados[j,i+1]<-0
+    }
     if (rownames(dataframe_resultados)[j] == "R2"){
       dataframe_resultados[j,i+1]<-summary(arx)$r.squared
     }
     if (rownames(dataframe_resultados)[j] == "MAE"){
       dataframe_resultados[j,i+1]<-mae(temperatura_interior_med,
                                        temperatura_interior_pred)
+    }
+    if (rownames(dataframe_resultados)[j] == "Media residuales"){
+      dataframe_resultados[j,i+1]<-media
+    }
+    if (rownames(dataframe_resultados)[j] == "Desviación típica residuales"){
+      dataframe_resultados[j,i+1]<-desv_tipica
     }
   }
   
@@ -439,7 +489,7 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
 #===============================================================================
 
 #===============================================================================
-# Enfoque 3:
+# Modelo 3:
   # Intersección en 0
   # Modelo completo e ir reduciendo
   # Reducción por pasos de tiempo
@@ -485,10 +535,10 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+5))
   rownames(dataframe_resultados)<-c(nombres_filas, 
-                                    "Signif. parám. menos signif.")
-  colnames(dataframe_resultados)<-"instante_actual" 
+                                    "p-valor del parámetro menos significativo")
+  colnames(dataframe_resultados)<-"Iteración 1" 
 }
 
 #-------------------------------------------------------------------------------
@@ -516,18 +566,30 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
       if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
-        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+        dataframe_resultados[i,1]<-arx$coefficients[j]
       }
     }
+    if (rownames(dataframe_resultados)[i] == "Número de variables"){
+      dataframe_resultados[i,1]<-length(arx$coefficients)
+    }
+    if (rownames(dataframe_resultados)[i] == "(Intercept)"){
+      dataframe_resultados[i,1]<-0
+    }
     if (rownames(dataframe_resultados)[i] == "R2"){
-      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+      dataframe_resultados[i,1]<-summary(arx)$r.squared
     }
     if (rownames(dataframe_resultados)[i] == "MAE"){
-      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+      dataframe_resultados[i,1]<-mae(temperatura_interior_med,
                                                    temperatura_interior_pred)
     }
-    if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
-      dataframe_resultados$instante_actual[i]<-significancia_min
+    if (rownames(dataframe_resultados)[i] == "p-valor del parámetro menos significativo"){
+      dataframe_resultados[i,1]<-significancia_min
+    }
+    if (rownames(dataframe_resultados)[i] == "Media residuales"){
+      dataframe_resultados[i,1]<-media
+    }
+    if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+      dataframe_resultados[i,1]<-desv_tipica
     }
   }
 }
@@ -581,6 +643,12 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
           dataframe_resultados$mas[i]<-arx$coefficients[k]
         }
       }
+      if (rownames(dataframe_resultados)[i] == "Número de variables"){
+        dataframe_resultados$mas[i]<-length(arx$coefficients)
+      }
+      if (rownames(dataframe_resultados)[i] == "(Intercept)"){
+        dataframe_resultados$mas[i]<-0
+      }
       if (rownames(dataframe_resultados)[i] == "R2"){
         dataframe_resultados$mas[i]<-summary(arx)$r.squared
       }
@@ -588,12 +656,18 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
         dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
                                          temperatura_interior_pred)
       }
-      if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+      if (rownames(dataframe_resultados)[i] == "p-valor del parámetro menos significativo"){
         dataframe_resultados$mas[i]<-significancia_min
+      }
+      if (rownames(dataframe_resultados)[i] == "Media residuales"){
+        dataframe_resultados$mas[i]<-media
+      }
+      if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+        dataframe_resultados$mas[i]<-desv_tipica
       }
     }
     l<-which(names(dataframe_resultados) == "mas")
-    nombre_columna<-paste("reducción", "_", l, sep="")
+    nombre_columna<-paste("Iteración ", l, sep="")
     colnames(dataframe_resultados)[l]<-nombre_columna
   }
 }
@@ -616,7 +690,7 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
 #===============================================================================
 
 #===============================================================================
-# Enfoque 4:
+# Modelo 4:
   # Intersección en 0
   # Modelo completo e ir reduciendo
   # Reducción por identificación de variable menos relevante
@@ -663,9 +737,9 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
 # Creación del dataframe de resultados e introducción del primer ARX
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas))
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+4))
   rownames(dataframe_resultados)<-nombres_filas
-  colnames(dataframe_resultados)<-"instante_actual"
+  colnames(dataframe_resultados)<-"Iteración 1"
   
   x<-obs_anteriores+1
   
@@ -679,15 +753,27 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
       if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
-        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+        dataframe_resultados[i,1]<-arx$coefficients[j]
       }
     }
+    if (rownames(dataframe_resultados)[i] == "Número de variables"){
+      dataframe_resultados[i,1]<-length(arx$coefficients)
+    }
+    if (rownames(dataframe_resultados)[i] == "(Intercept)"){
+      dataframe_resultados[i,1]<-0
+    }
     if (rownames(dataframe_resultados)[i] == "R2"){
-      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+      dataframe_resultados[i,1]<-summary(arx)$r.squared
     }
     if (rownames(dataframe_resultados)[i] == "MAE"){
-      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+      dataframe_resultados[i,1]<-mae(temperatura_interior_med,
                                                    temperatura_interior_pred)
+    }
+    if (rownames(dataframe_resultados)[i] == "Media residuales"){
+      dataframe_resultados[i,1]<-media
+    }
+    if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+      dataframe_resultados[i,1]<-desv_tipica
     }
   }
 }
@@ -786,6 +872,12 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
           dataframe_resultados$mas[i]<-arx$coefficients[k]
         }
       }
+      if (rownames(dataframe_resultados)[i] == "Número de variables"){
+        dataframe_resultados$mas[i]<-length(arx$coefficients)
+      }
+      if (rownames(dataframe_resultados)[i] == "(Intercept)"){
+        dataframe_resultados$mas[i]<-0
+      }
       if (rownames(dataframe_resultados)[i] == "R2"){
         dataframe_resultados$mas[i]<-summary(arx)$r.squared
       }
@@ -793,9 +885,15 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
         dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
                                          temperatura_interior_pred)
       }
+      if (rownames(dataframe_resultados)[i] == "Media residuales"){
+        dataframe_resultados$mas[i]<-media
+      }
+      if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+        dataframe_resultados$mas[i]<-desv_tipica
+      }
     }
     j<-which(names(dataframe_resultados) == "mas")
-    nombre_columna<-paste("reducción", "_", j, sep="")
+    nombre_columna<-paste("Iteración ", j, sep="")
     colnames(dataframe_resultados)[j]<-nombre_columna
   } 
 }
@@ -818,7 +916,7 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
 #===============================================================================
 
 #===============================================================================
-# Enfoque 5:
+# Modelo 5:
   # Intersección libre
   # Extensión del modelo desde el instante inicial hasta el pasado
   # Extensión por pasos de tiempo
@@ -827,11 +925,10 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+2))
-  rownames(dataframe_resultados)<-c("(Intercept)",
-                                    nombres_filas,
-                                    "Signif. parám. menos signif.")
-  colnames(dataframe_resultados)<-"instante_actual"
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+5))
+  rownames(dataframe_resultados)<-c(nombres_filas,
+                                    "p-valor del parámetro menos significativo")
+  colnames(dataframe_resultados)<-"Iteración 1"
 }
 
 #-------------------------------------------------------------------------------
@@ -888,22 +985,31 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
       for (i in 1:nrow(dataframe_resultados)){
         for (k in 1:length(names(arx$coefficients))){
           if (rownames(dataframe_resultados[i,0])==names(arx$coefficients)[k]){
-            dataframe_resultados$instante_actual[i]<-arx$coefficients[k]
+            dataframe_resultados[i,1]<-arx$coefficients[k]
           }
         }
+        if (rownames(dataframe_resultados)[i] == "Número de variables"){
+          dataframe_resultados[i,1]<-length(arx$coefficients)
+        }
         if (rownames(dataframe_resultados)[i] == "R2"){
-          dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+          dataframe_resultados[i,1]<-summary(arx)$r.squared
         }
         if (rownames(dataframe_resultados)[i] == "MAE"){
-          dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+          dataframe_resultados[i,1]<-mae(temperatura_interior_med,
                                                        temperatura_interior_pred)
         }
-        if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
-          dataframe_resultados$instante_actual[i]<-significancia_min
+        if (rownames(dataframe_resultados)[i] == "p-valor del parámetro menos significativo"){
+          dataframe_resultados[i,1]<-significancia_min
+        }
+        if (rownames(dataframe_resultados)[i] == "Media residuales"){
+          dataframe_resultados[i,1]<-media
+        }
+        if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+          dataframe_resultados[i,1]<-desv_tipica
         }
       }
     } else {
-      nombre_columna<-paste("instante_pasado", j, sep="_")
+      nombre_columna<-paste("Iteración ", j+1, sep="")
       dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
       colnames(dataframe_resultados)[j+1]<-nombre_columna
       for (i in 1:nrow(dataframe_resultados)){
@@ -912,6 +1018,9 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
             dataframe_resultados[i,j+1]<-arx$coefficients[k]
           }
         }
+        if (rownames(dataframe_resultados)[i] == "Número de variables"){
+          dataframe_resultados[i,j+1]<-length(arx$coefficients)
+        }
         if (rownames(dataframe_resultados)[i] == "R2"){
           dataframe_resultados[i,j+1]<-summary(arx)$r.squared
         }
@@ -919,8 +1028,14 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k,
           dataframe_resultados[i,j+1]<-mae(temperatura_interior_med,
                                            temperatura_interior_pred)
         }
-        if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+        if (rownames(dataframe_resultados)[i] == "p-valor del parámetro menos significativo"){
           dataframe_resultados[i,j+1]<-significancia_min
+        }
+        if (rownames(dataframe_resultados)[i] == "Media residuales"){
+          dataframe_resultados[i,j+1]<-media
+        }
+        if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+          dataframe_resultados[i,j+1]<-desv_tipica
         }
       }
     }
@@ -945,7 +1060,7 @@ rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
 #===============================================================================
 
 #===============================================================================
-# Enfoque 6:
+# Modelo 6:
   # Intersección libre
   # Extensión del modelo desde el instante inicial hasta el pasado
   # Extensión por identificación de variable más relevante
@@ -980,9 +1095,9 @@ rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
-  rownames(dataframe_resultados)<-c("(Intercept)", nombres_filas)
-  colnames(dataframe_resultados)<-"instante_actual" 
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+4))
+  rownames(dataframe_resultados)<-c(nombres_filas)
+  colnames(dataframe_resultados)<-"Iteración 1" 
 }
 
 #-------------------------------------------------------------------------------
@@ -1000,15 +1115,24 @@ rm(a, arx, dataframe_resultados, formula, i, j, k, nombre_columna, nombre_var,
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
       if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
-        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+        dataframe_resultados[i,1]<-arx$coefficients[j]
       }
     }
     if (rownames(dataframe_resultados)[i] == "R2"){
-      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+      dataframe_resultados[i,1]<-summary(arx)$r.squared
     }
     if (rownames(dataframe_resultados)[i] == "MAE"){
-      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+      dataframe_resultados[i,1]<-mae(temperatura_interior_med,
                                                    temperatura_interior_pred)
+    }
+    if (rownames(dataframe_resultados)[i] == "Media residuales"){
+      dataframe_resultados[i,1]<-media
+    }
+    if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+      dataframe_resultados[i,1]<-desv_tipica
+    }
+    if (rownames(dataframe_resultados)[i] == "Número de variables"){
+      dataframe_resultados[i,1]<-length(arx$coefficients)
     }
   }
 }
@@ -1082,7 +1206,7 @@ for (i in 1:obs_anteriores){
     media<-mean(arx$residuals)
     desv_tipica<-sd(arx$residuals)
     
-    nombre_columna<-paste("instante_pasado", i, sep="_")
+    nombre_columna<-paste("Iteración ", i+1, sep="")
     dataframe_resultados$mas<-rep(NA,nrow(dataframe_resultados))
     colnames(dataframe_resultados)[i+1]<-nombre_columna
     
@@ -1098,6 +1222,15 @@ for (i in 1:obs_anteriores){
       if (rownames(dataframe_resultados)[j] == "MAE"){
         dataframe_resultados[j,i+1]<-mae(temperatura_interior_med,
                                          temperatura_interior_pred)
+      }
+      if (rownames(dataframe_resultados)[j] == "Media residuales"){
+        dataframe_resultados[j,i+1]<-media
+      }
+      if (rownames(dataframe_resultados)[j] == "Desviación típica residuales"){
+        dataframe_resultados[j,i+1]<-desv_tipica
+      }
+      if (rownames(dataframe_resultados)[j] == "Número de variables"){
+        dataframe_resultados[j,i+1]<-length(arx$coefficients)
       }
     }
     
@@ -1143,7 +1276,7 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
 #===============================================================================
 
 #===============================================================================
-# Enfoque 7:
+# Modelo 7:
   # Intersección libre
   # Modelo completo e ir reduciendo
   # Reducción por pasos de tiempo
@@ -1189,11 +1322,10 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
 # Creación del dataframe de resultados
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+2))
-  rownames(dataframe_resultados)<-c("(Intercept)", 
-                                    nombres_filas,
-                                    "Signif. parám. menos signif.")
-  colnames(dataframe_resultados)<-"instante_actual" 
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+5))
+  rownames(dataframe_resultados)<-c(nombres_filas,
+                                    "p-valor del parámetro menos significativo")
+  colnames(dataframe_resultados)<-"Iteración 1" 
 }
 
 #-------------------------------------------------------------------------------
@@ -1221,18 +1353,27 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
       if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
-        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+        dataframe_resultados[i,1]<-arx$coefficients[j]
       }
     }
     if (rownames(dataframe_resultados)[i] == "R2"){
-      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+      dataframe_resultados[i,1]<-summary(arx)$r.squared
     }
     if (rownames(dataframe_resultados)[i] == "MAE"){
-      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+      dataframe_resultados[i,1]<-mae(temperatura_interior_med,
                                                    temperatura_interior_pred)
     }
-    if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
-      dataframe_resultados$instante_actual[i]<-significancia_min
+    if (rownames(dataframe_resultados)[i] == "p-valor del parámetro menos significativo"){
+      dataframe_resultados[i,1]<-significancia_min
+    }
+    if (rownames(dataframe_resultados)[i] == "Media residuales"){
+      dataframe_resultados[i,1]<-media
+    }
+    if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+      dataframe_resultados[i,1]<-desv_tipica
+    }
+    if (rownames(dataframe_resultados)[i] == "Número de variables"){
+      dataframe_resultados[i,1]<-length(arx$coefficients)
     }
   }
 }
@@ -1295,12 +1436,21 @@ rm(a, arx, dataframe_resultados, dejadas, final, formula, i, j, k,
         dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
                                          temperatura_interior_pred)
       }
-      if (rownames(dataframe_resultados)[i] == "Signif. parám. menos signif."){
+      if (rownames(dataframe_resultados)[i] == "p-valor del parámetro menos significativo"){
         dataframe_resultados$mas[i]<-significancia_min
+      }
+      if (rownames(dataframe_resultados)[i] == "Media residuales"){
+        dataframe_resultados$mas[i]<-media
+      }
+      if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+        dataframe_resultados$mas[i]<-desv_tipica
+      }
+      if (rownames(dataframe_resultados)[i] == "Número de variables"){
+        dataframe_resultados$mas[i]<-length(arx$coefficients)
       }
     }
     l<-which(names(dataframe_resultados) == "mas")
-    nombre_columna<-paste("reducción", "_", l, sep="")
+    nombre_columna<-paste("Iteración ", l, sep="")
     colnames(dataframe_resultados)[l]<-nombre_columna
   }
 }
@@ -1323,7 +1473,7 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
 #===============================================================================
 
 #===============================================================================
-# Enfoque 8:
+# Modelo 8:
   # Intersección libre
   # Modelo completo e ir reduciendo
   # Reducción por identificación de variable menos relevante
@@ -1370,9 +1520,9 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
 # Creación del dataframe de resultados e introducción del primer ARX
 
 {
-  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+1))
-  rownames(dataframe_resultados)<-c("(Intercept)", nombres_filas)
-  colnames(dataframe_resultados)<-"instante_actual"
+  dataframe_resultados<-data.frame(matrix(nrow=numero_filas+4))
+  rownames(dataframe_resultados)<-c(nombres_filas)
+  colnames(dataframe_resultados)<-"Interación 1"
   
   x<-obs_anteriores+1
   
@@ -1386,15 +1536,24 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
   for (i in 1:nrow(dataframe_resultados)){
     for (j in 1:length(arx$coefficients)){
       if (rownames(dataframe_resultados)[i] == names(arx$coefficients)[j]){
-        dataframe_resultados$instante_actual[i]<-arx$coefficients[j]
+        dataframe_resultados[i,1]<-arx$coefficients[j]
       }
     }
     if (rownames(dataframe_resultados)[i] == "R2"){
-      dataframe_resultados$instante_actual[i]<-summary(arx)$r.squared
+      dataframe_resultados[i,1]<-summary(arx)$r.squared
     }
     if (rownames(dataframe_resultados)[i] == "MAE"){
-      dataframe_resultados$instante_actual[i]<-mae(temperatura_interior_med,
+      dataframe_resultados[i,1]<-mae(temperatura_interior_med,
                                                    temperatura_interior_pred)
+    }
+    if (rownames(dataframe_resultados)[i] == "Media residuales"){
+      dataframe_resultados[i,1]<-media
+    }
+    if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+      dataframe_resultados[i,1]<-desv_tipica
+    }
+    if (rownames(dataframe_resultados)[i] == "Número de variables"){
+      dataframe_resultados[i,1]<-length(arx$coefficients)
     }
   }
 }
@@ -1500,9 +1659,18 @@ rm(a, arx, dataframe_resultados, final, formula, i, j, k, l, nombre_columna,
         dataframe_resultados$mas[i]<-mae(temperatura_interior_med,
                                          temperatura_interior_pred)
       }
+      if (rownames(dataframe_resultados)[i] == "Media residuales"){
+        dataframe_resultados$mas[i]<-media
+      }
+      if (rownames(dataframe_resultados)[i] == "Desviación típica residuales"){
+        dataframe_resultados$mas[i]<-desv_tipica
+      }
+      if (rownames(dataframe_resultados)[i] == "Número de variables"){
+        dataframe_resultados$mas[i]<-length(arx$coefficients)
+      }
     }
     j<-which(names(dataframe_resultados) == "mas")
-    nombre_columna<-paste("reducción", "_", j, sep="")
+    nombre_columna<-paste("Iteración ", j, sep="")
     colnames(dataframe_resultados)[j]<-nombre_columna
   } 
 }

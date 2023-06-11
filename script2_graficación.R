@@ -71,8 +71,9 @@ dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
   
   png(paste(wd,"/plots/ocupantes_presencia_primer_dia.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo, subset$ocupantes_presencia, 
-       xlab="Hora", ylab="Presencia de ocupantes")
+       xlab="Hora", ylab="Presencia de ocupantes", cex.lab=1.5, cex.axis=1.5)
   dev.off()
   
   plot(subset$marca_tiempo, subset$ocupantes_conteo, 
@@ -82,10 +83,11 @@ dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
   
   png(paste(wd,"/plots/ocupantes_conteo_primer_dia.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo, subset$ocupantes_conteo, 
        xlab="Hora", ylab="Número de ocupantes",
        ylim=c(min(dataset$ocupantes_conteo),
-              max(dataset$ocupantes_conteo)))
+              max(dataset$ocupantes_conteo)), cex.lab=1.5, cex.axis=1.5)
   dev.off()
 }
 
@@ -158,11 +160,12 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/graf_temperatura_interior1.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
        dataset$temperatura_interior[comienzo:final],
        xlab="Hora", ylab="Temperatura interior [ºC]",
        ylim=c(min(dataset$temperatura_interior),
-              max(dataset$temperatura_interior)))
+              max(dataset$temperatura_interior)), cex.lab=1.5, cex.axis=1.5)
   dev.off()
   
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -173,11 +176,12 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/graf_temperatura_exterior1.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
        dataset$temperatura_exterior[comienzo:final],
        xlab="Hora", ylab="Temperatura exterior [ºC]",
        ylim=c(min(dataset$temperatura_exterior),
-              max(dataset$temperatura_exterior)))
+              max(dataset$temperatura_exterior)), cex.lab=1.5, cex.axis=1.5)
   dev.off()
   
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -188,11 +192,12 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/graf_energia_agua_refrigerada1.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
        dataset$energia_agua_refrigerada[comienzo:final],
        xlab="Hora", ylab="Energía agua refrigerada [kWh]",
        ylim=c(min(dataset$energia_agua_refrigerada),
-              max(dataset$energia_agua_refrigerada)))
+              max(dataset$energia_agua_refrigerada)), cex.lab=1.5, cex.axis=1.5)
   dev.off()
   
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -203,11 +208,13 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/graf_radiacion_solar_global_horizontal1.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
        dataset$radiacion_solar_global_horizontal[comienzo:final],
        xlab="Hora", ylab="Radiación solar global horizontal [W/m2]",
        ylim=c(min(dataset$radiacion_solar_global_horizontal),
-              max(dataset$radiacion_solar_global_horizontal)))
+              max(dataset$radiacion_solar_global_horizontal)),
+       cex.lab=1.5, cex.axis=1.5)
   dev.off() 
 }
 
@@ -228,11 +235,12 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/graf_temperatura_interior2.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
        dataset$temperatura_interior[comienzo:final],
        xlab="Hora", ylab="Temperatura interior [ºC]",
        ylim=c(min(dataset$temperatura_interior),
-              max(dataset$temperatura_interior)))
+              max(dataset$temperatura_interior)), cex.lab=1.5, cex.axis=1.5)
   dev.off()
   
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -243,11 +251,12 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/graf_temperatura_exterior2.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
        dataset$temperatura_exterior[comienzo:final],
        xlab="Hora", ylab="Temperatura exterior [ºC]",
        ylim=c(min(dataset$temperatura_exterior),
-              max(dataset$temperatura_exterior)))
+              max(dataset$temperatura_exterior)), cex.lab=1.5, cex.axis=1.5)
   dev.off()
   
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -258,11 +267,12 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/graf_energia_agua_refrigerada2.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
        dataset$energia_agua_refrigerada[comienzo:final],
        xlab="Hora", ylab="Energía agua refrigerada [kWh]",
        ylim=c(min(dataset$energia_agua_refrigerada),
-              max(dataset$energia_agua_refrigerada)))
+              max(dataset$energia_agua_refrigerada)), cex.lab=1.5, cex.axis=1.5)
   dev.off()
   
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -273,11 +283,13 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/graf_radiacion_solar_global_horizontal2.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
        dataset$radiacion_solar_global_horizontal[comienzo:final],
        xlab="Hora", ylab="Radiación solar global horizontal [W/m2]",
        ylim=c(min(dataset$radiacion_solar_global_horizontal),
-              max(dataset$radiacion_solar_global_horizontal)))
+              max(dataset$radiacion_solar_global_horizontal)),
+       cex.lab=1.5, cex.axis=1.5)
   dev.off() 
 }
 
@@ -296,9 +308,10 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/hora_vs_temperatura_interior.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(hora, 
        dataset$temperatura_interior,
-       xlab="Hora", ylab="Temperatura interior [ºC]")
+       xlab="Hora", ylab="Temperatura interior [ºC]", cex.lab=1.5, cex.axis=1.5)
   abline(v=12, col="red", lwd=4)
   dev.off()
   
@@ -309,9 +322,10 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/hora_vs_temperatura_exterior.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(hora, 
        dataset$temperatura_exterior,
-       xlab="Hora", ylab="Temperatura exterior [ºC]")
+       xlab="Hora", ylab="Temperatura exterior [ºC]", cex.lab=1.5, cex.axis=1.5)
   abline(v=12, col="red", lwd=4)
   dev.off()
   
@@ -322,9 +336,11 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/hora_vs_energia_agua_refrigerada.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(hora, 
        dataset$energia_agua_refrigerada,
-       xlab="Hora", ylab="Energía agua refrigerada [kWh]")
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]",
+       cex.lab=1.5, cex.axis=1.5)
   abline(v=12, col="red", lwd=4)
   dev.off()
   
@@ -335,15 +351,14 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/hora_vs_radiacion_solar_global_horizontal.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(hora, 
        dataset$radiacion_solar_global_horizontal,
-       xlab="Hora", ylab="Radiación solar global horizontal [W/m2]")
+       xlab="Hora", ylab="Radiación solar global horizontal [W/m2]",
+       cex.lab=1.5, cex.axis=1.5)
   abline(v=12, col="red", lwd=4)
   dev.off() 
 }
-
-
-#-------------------------------------------------------------------------------
 
 #===============================================================================
 
@@ -372,15 +387,62 @@ rm(i,exit, subset)
   
   png(paste(wd,"/plots/hora_vs_carga_vs_temperatura_ext.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(hora, dataset$energia_agua_refrigerada, col=color_palette,
        ylim=c(min(dataset$energia_agua_refrigerada),
               max(dataset$energia_agua_refrigerada)+1.5),
-       xlab="Hora", ylab="Energía agua refrigerada [kWh]")
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]",
+       cex.lab=1.5, cex.axis=1.5)
   gradientLegend(valRange=c(min(dataset$temperatura_exterior), 
                             max(dataset$temperatura_exterior)),
                  color=color_palette, nCol = 100, pos = 0.5, side = 3,
                  length = 0.8, depth = 0.1, inside = TRUE, coords = FALSE,
+                 pos.num = NULL, n.seg = 3, border.col = "black", dec = 2,
+                 cex=1.5)
+  dev.off() 
+}
+
+#===============================================================================
+
+#===============================================================================
+# Graficación de:
+# - Hora
+# - Carga térmica (energía de agua refrigerada)
+# - Radiación solar global horizontal
+#-------------------------------------------------------------------------------
+
+{
+  norm_radiacion<-(dataset$radiacion_solar_global_horizontal-
+                     min(dataset$radiacion_solar_global_horizontal))/
+    (max(dataset$radiacion_solar_global_horizontal-
+           min(dataset$radiacion_solar_global_horizontal)))
+  
+  color_palette<-colorRampPalette(colors=c("yellow", "red"))(length(norm_radiacion))   
+  
+  plot(hora, dataset$energia_agua_refrigerada, col=color_palette,
+       ylim=c(min(dataset$energia_agua_refrigerada),
+              max(dataset$energia_agua_refrigerada)+1.5),
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]")
+  gradientLegend(valRange=c(min(dataset$radiacion_solar_global_horizontal), 
+                            max(dataset$radiacion_solar_global_horizontal)),
+                 color=color_palette, nCol = 100, pos = 0.5, side = 3,
+                 length = 0.8, depth = 0.1, inside = TRUE, coords = FALSE,
                  pos.num = NULL, n.seg = 3, border.col = "black", dec = 2)
+  
+  png(paste(wd,"/plots/hora_vs_carga_vs_radiacion.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot(hora, dataset$energia_agua_refrigerada, col=color_palette,
+       ylim=c(min(dataset$energia_agua_refrigerada),
+              max(dataset$energia_agua_refrigerada)+1.5),
+       xlab="Hora", ylab="Energía agua refrigerada [kWh]", 
+       cex.lab=1.5, cex.axis=1.5)
+  gradientLegend(valRange=c(min(dataset$radiacion_solar_global_horizontal), 
+                            max(dataset$radiacion_solar_global_horizontal)),
+                 color=color_palette, nCol = 100, pos = 0.5, side = 3,
+                 length = 0.8, depth = 0.1, inside = TRUE, coords = FALSE,
+                 pos.num = NULL, n.seg = 3, border.col = "black", dec = 2, 
+                 cex=1.5)
   dev.off() 
 }
 
@@ -388,6 +450,8 @@ rm(i,exit, subset)
 
 # Limpieza de variables
 
-rm(comienzo, final, diferencia, exit, i, hora, color_palette, norm_temp_ext)
+rm(comienzo, final, diferencia, exit, i, hora, color_palette, norm_temp_ext,
+   norm_radiacion)
 
 #===============================================================================
+

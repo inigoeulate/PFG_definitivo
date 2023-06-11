@@ -208,10 +208,12 @@ dataset$hora_solar<-as.POSIXct(strftime(dataset$hora_solar,
     # Generación del archivo PNG con las gráficas
 {
   png(paste(wd,"/plots/dia_alta_radiacion.png",sep=""), width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(dia10$hora_solar, dia10$radiacion_solar_global_horizontal,
        xlab="Hora solar", ylab="Radiación [W/m2]",col="blue",cex=1.5,
        ylim=c(min(dia10$radiacion_solar_global_horizontal),
-              max(dia10$radiacion_solar_global_horizontal)))
+              max(dia10$radiacion_solar_global_horizontal)+200),
+       cex.lab=1.5, cex.axis=1.5)
   points(dia10$hora_solar, dia10$radiacion_difusa, col="yellow", cex=1.5)
   points(dia10$hora_solar, dia10$radiacion_directa_fachada, col="orange", 
          cex=1.5)
@@ -223,7 +225,7 @@ dataset$hora_solar<-as.POSIXct(strftime(dataset$hora_solar,
                                "Radiación solar global sobre fachada"),
          col=c("blue", "yellow", "orange", "red"),
          lty=c(1, 1, 1, 1),
-         cex=1.4)
+         cex=2)
   dev.off()
 }
 
@@ -271,10 +273,12 @@ dia13<-dataset[comienzo:final,]
 {
   png(paste(getwd(),"/plots/dia_baja_radiacion.png",sep=""), width=800, 
       height=800)
+  par(mar=c(5,5,3,5))
   plot(dia13$hora_solar, dia13$radiacion_solar_global_horizontal, 
        xlab="Hora solar", ylab="Radiación [W/m2]",col="blue",cex=1.5,
        ylim=c(min(dia10$radiacion_solar_global_horizontal),
-              max(dia10$radiacion_solar_global_horizontal)))
+              max(dia10$radiacion_solar_global_horizontal)+200),
+       cex.lab=1.5, cex.axis=1.5)
   points(dia13$hora_solar, dia13$radiacion_difusa, col="yellow", cex=1.5)
   points(dia13$hora_solar, dia13$radiacion_directa_fachada, col="orange", 
          cex=1.5)
@@ -286,7 +290,7 @@ dia13<-dataset[comienzo:final,]
                                "Radiación solar global sobre fachada"),
          col=c("blue", "yellow", "orange", "red"),
          lty=c(1, 1, 1, 1),
-         cex=1.4)
+         cex=2)
   dev.off()
 }
 

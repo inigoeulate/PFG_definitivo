@@ -129,11 +129,12 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
   
   png(paste(wd,"/plots/ocupantes_conteo_primer_dia_postmm.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo[comienzo:final],
        subset$ocupantes_conteo[comienzo:final],
        xlab="Hora", ylab="Número de ocupantes",
        ylim=c(min(dataset$ocupantes_conteo),
-              max(dataset$ocupantes_conteo)))
+              max(dataset$ocupantes_conteo)), cex.axis=1.5, cex.lab=1.5)
   dev.off()
   
   plot(subset$marca_tiempo[comienzo:final],
@@ -144,11 +145,12 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
   
   png(paste(wd,"/plots/ocupantes_conteo_robus3_primer_dia.png",sep=""), 
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo[comienzo:final],
        subset$ocupantes_conteo_robus3[comienzo:final],
        xlab="Hora", ylab="Número de ocupantes",
        ylim=c(min(dataset$ocupantes_conteo),
-              max(dataset$ocupantes_conteo)))
+              max(dataset$ocupantes_conteo)), cex.axis=1.5, cex.lab=1.5)
   dev.off()
   
   plot(subset$marca_tiempo[comienzo:final],
@@ -159,11 +161,12 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
   
   png(paste(wd,"/plots/ocupantes_conteo_robus5_primer_dia.png",sep=""),
       width=800, height=800)
+  par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo[comienzo:final],
        subset$ocupantes_conteo_robus5[comienzo:final],
        xlab="Hora", ylab="Número de ocupantes",
        ylim=c(min(dataset$ocupantes_conteo),
-              max(dataset$ocupantes_conteo)))
+              max(dataset$ocupantes_conteo)), cex.axis=1.5, cex.lab=1.5)
   dev.off() 
 }
 
