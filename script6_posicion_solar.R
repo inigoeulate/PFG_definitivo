@@ -17,7 +17,10 @@
 # Obtención del dataset
 #-------------------------------------------------------------------------------
 
-dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
+{
+  wd<-getwd()
+  dataset<-readRDS(paste(wd, "/rds_files/dataset3.rds", sep=""))
+}
 
 #===============================================================================
 
@@ -151,7 +154,7 @@ dataset<-cbind(dataset,altura,cenit,acimut)
 # Exportar dataset
 
 {
-  saveRDS(dataset, paste(wd, "/rds_files/dataset.rds", sep=""))
+  saveRDS(dataset, paste(wd, "/rds_files/dataset4.rds", sep=""))
   
   write.csv2(dataset, paste(wd, "/datasets/room4_4.csv", sep=""), 
              row.names=FALSE) 

@@ -18,7 +18,10 @@
 # Obtención del dataset
 #-------------------------------------------------------------------------------
 
-dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
+{
+  wd<-getwd()
+  dataset<-readRDS(paste(wd, "/rds_files/dataset1.rds", sep=""))
+}
 
 #===============================================================================
 
@@ -127,7 +130,7 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
        ylim=c(min(dataset$ocupantes_conteo),
               max(dataset$ocupantes_conteo)))
   
-  png(paste(wd,"/plots/ocupantes_conteo_primer_dia_postmm.png",sep=""), 
+  png(paste(wd,"/plots/2_occupation/ocupantes_conteo_primer_dia_postmm.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo[comienzo:final],
@@ -143,7 +146,7 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
        ylim=c(min(dataset$ocupantes_conteo),
               max(dataset$ocupantes_conteo)))
   
-  png(paste(wd,"/plots/ocupantes_conteo_robus3_primer_dia.png",sep=""), 
+  png(paste(wd,"/plots/2_occupation/ocupantes_conteo_robus3_primer_dia.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo[comienzo:final],
@@ -159,7 +162,7 @@ subset$marca_tiempo<-as.POSIXct(strftime(subset$marca_tiempo,
        ylim=c(min(dataset$ocupantes_conteo),
               max(dataset$ocupantes_conteo)))
   
-  png(paste(wd,"/plots/ocupantes_conteo_robus5_primer_dia.png",sep=""),
+  png(paste(wd,"/plots/2_occupation/ocupantes_conteo_robus5_primer_dia.png",sep=""),
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo[comienzo:final],
@@ -187,7 +190,7 @@ dataset<-na.omit(dataset)
 # Exportar dataset
 
 {
-  saveRDS(dataset, paste(wd, "/rds_files/dataset.rds", sep=""))
+  saveRDS(dataset, paste(wd, "/rds_files/dataset2.rds", sep=""))
   
   write.csv2(dataset, paste(wd, "/datasets/room4_2.csv", sep=""), 
              row.names=FALSE) 

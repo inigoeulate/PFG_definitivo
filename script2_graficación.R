@@ -35,7 +35,10 @@ library(itsadug)
 # Obtención del dataset
 #-------------------------------------------------------------------------------
 
-dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
+{
+  wd<-getwd()
+  dataset<-readRDS(paste(wd, "/rds_files/dataset1.rds", sep=""))
+}
 
 #===============================================================================
 
@@ -69,7 +72,7 @@ dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
   plot(subset$marca_tiempo, subset$ocupantes_presencia, 
        xlab="Hora", ylab="Presencia de ocupantes")
   
-  png(paste(wd,"/plots/ocupantes_presencia_primer_dia.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/ocupantes_presencia_primer_dia.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo, subset$ocupantes_presencia, 
@@ -81,7 +84,7 @@ dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
        ylim=c(min(dataset$ocupantes_conteo),
               max(dataset$ocupantes_conteo)))
   
-  png(paste(wd,"/plots/ocupantes_conteo_primer_dia.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/ocupantes_conteo_primer_dia.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(subset$marca_tiempo, subset$ocupantes_conteo, 
@@ -158,7 +161,7 @@ rm(i,exit, subset)
        ylim=c(min(dataset$temperatura_interior),
               max(dataset$temperatura_interior)))
   
-  png(paste(wd,"/plots/graf_temperatura_interior1.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/graf_temperatura_interior1.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -174,7 +177,7 @@ rm(i,exit, subset)
        ylim=c(min(dataset$temperatura_exterior),
               max(dataset$temperatura_exterior)))
   
-  png(paste(wd,"/plots/graf_temperatura_exterior1.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/graf_temperatura_exterior1.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -190,7 +193,7 @@ rm(i,exit, subset)
        ylim=c(min(dataset$energia_agua_refrigerada),
               max(dataset$energia_agua_refrigerada)))
   
-  png(paste(wd,"/plots/graf_energia_agua_refrigerada1.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/graf_energia_agua_refrigerada1.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -206,7 +209,7 @@ rm(i,exit, subset)
        ylim=c(min(dataset$radiacion_solar_global_horizontal),
               max(dataset$radiacion_solar_global_horizontal)))
   
-  png(paste(wd,"/plots/graf_radiacion_solar_global_horizontal1.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/graf_radiacion_solar_global_horizontal1.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -233,7 +236,7 @@ rm(i,exit, subset)
        ylim=c(min(dataset$temperatura_interior),
               max(dataset$temperatura_interior)))
   
-  png(paste(wd,"/plots/graf_temperatura_interior2.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/graf_temperatura_interior2.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -249,7 +252,7 @@ rm(i,exit, subset)
        ylim=c(min(dataset$temperatura_exterior),
               max(dataset$temperatura_exterior)))
   
-  png(paste(wd,"/plots/graf_temperatura_exterior2.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/graf_temperatura_exterior2.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -265,7 +268,7 @@ rm(i,exit, subset)
        ylim=c(min(dataset$energia_agua_refrigerada),
               max(dataset$energia_agua_refrigerada)))
   
-  png(paste(wd,"/plots/graf_energia_agua_refrigerada2.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/graf_energia_agua_refrigerada2.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -281,7 +284,7 @@ rm(i,exit, subset)
        ylim=c(min(dataset$radiacion_solar_global_horizontal),
               max(dataset$radiacion_solar_global_horizontal)))
   
-  png(paste(wd,"/plots/graf_radiacion_solar_global_horizontal2.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/graf_radiacion_solar_global_horizontal2.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataset$marca_tiempo[comienzo:final], 
@@ -306,7 +309,7 @@ rm(i,exit, subset)
        xlab="Hora", ylab="Temperatura interior [ºC]")
   abline(v=12, col="red", lwd=4)
   
-  png(paste(wd,"/plots/hora_vs_temperatura_interior.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/hora_vs_temperatura_interior.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(hora, 
@@ -320,7 +323,7 @@ rm(i,exit, subset)
        xlab="Hora", ylab="Temperatura exterior [ºC]")
   abline(v=12, col="red", lwd=4)
   
-  png(paste(wd,"/plots/hora_vs_temperatura_exterior.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/hora_vs_temperatura_exterior.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(hora, 
@@ -334,7 +337,7 @@ rm(i,exit, subset)
        xlab="Hora", ylab="Energía agua refrigerada [kWh]")
   abline(v=12, col="red", lwd=4)
   
-  png(paste(wd,"/plots/hora_vs_energia_agua_refrigerada.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/hora_vs_energia_agua_refrigerada.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(hora, 
@@ -349,7 +352,7 @@ rm(i,exit, subset)
        xlab="Hora", ylab="Radiación solar global horizontal [W/m2]")
   abline(v=12, col="red", lwd=4)
   
-  png(paste(wd,"/plots/hora_vs_radiacion_solar_global_horizontal.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/hora_vs_radiacion_solar_global_horizontal.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(hora, 
@@ -385,7 +388,7 @@ rm(i,exit, subset)
                  length = 0.8, depth = 0.1, inside = TRUE, coords = FALSE,
                  pos.num = NULL, n.seg = 3, border.col = "black", dec = 2)
   
-  png(paste(wd,"/plots/hora_vs_carga_vs_temperatura_ext.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/hora_vs_carga_vs_temperatura_ext.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(hora, dataset$energia_agua_refrigerada, col=color_palette,
@@ -429,7 +432,7 @@ rm(i,exit, subset)
                  length = 0.8, depth = 0.1, inside = TRUE, coords = FALSE,
                  pos.num = NULL, n.seg = 3, border.col = "black", dec = 2)
   
-  png(paste(wd,"/plots/hora_vs_carga_vs_radiacion.png",sep=""), 
+  png(paste(wd,"/plots/1_graf/hora_vs_carga_vs_radiacion.png",sep=""), 
       width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(hora, dataset$energia_agua_refrigerada, col=color_palette,

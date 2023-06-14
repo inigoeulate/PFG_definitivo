@@ -104,7 +104,7 @@ dataset$marca_tiempo<-as.POSIXct(strftime(dataset$marca_tiempo,
   write.csv2(dataset, paste(wd, "/datasets/room4_1.csv", sep=""), 
              row.names=FALSE) 
   
-  saveRDS(dataset, paste(wd, "/rds_files/dataset.rds", sep=""))
+  saveRDS(dataset, paste(wd, "/rds_files/dataset1.rds", sep=""))
 }
 
 #===============================================================================

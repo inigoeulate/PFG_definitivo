@@ -17,7 +17,10 @@
 # Obtención del dataset
 #-------------------------------------------------------------------------------
 
-dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
+{
+  wd<-getwd()
+  dataset<-readRDS(paste(wd, "/rds_files/dataset4.rds", sep=""))
+}
 
 #===============================================================================
 
@@ -122,7 +125,7 @@ dataset<-cbind(dataset, radiacion_global_fachada, radiacion_difusa,
 # Exportar dataset
 
 {
-  saveRDS(dataset, paste(wd, "/rds_files/dataset.rds", sep=""))
+  saveRDS(dataset, paste(wd, "/rds_files/dataset5.rds", sep=""))
   
   write.csv2(dataset, paste(wd, "/datasets/room4_5.csv", sep=""), 
              row.names=FALSE) 
@@ -207,7 +210,7 @@ dataset$hora_solar<-as.POSIXct(strftime(dataset$hora_solar,
 
     # Generación del archivo PNG con las gráficas
 {
-  png(paste(wd,"/plots/dia_alta_radiacion.png",sep=""), width=800, height=800)
+  png(paste(wd,"/plots/3_radiation/dia_alta_radiacion.png",sep=""), width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dia10$hora_solar, dia10$radiacion_solar_global_horizontal,
        xlab="Hora solar", ylab="Radiación [W/m2]",col="blue",cex=1.5,
@@ -271,7 +274,7 @@ dia13<-dataset[comienzo:final,]
     # Generación del archivo PNG con las gráficas
 
 {
-  png(paste(getwd(),"/plots/dia_baja_radiacion.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/3_radiation/dia_baja_radiacion.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot(dia13$hora_solar, dia13$radiacion_solar_global_horizontal, 

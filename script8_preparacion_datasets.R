@@ -18,7 +18,10 @@
 # Obtención del dataset
 #-------------------------------------------------------------------------------
 
-dataset<-readRDS(paste(wd, "/rds_files/dataset.rds", sep=""))
+{
+  wd<-getwd()
+  dataset<-readRDS(paste(wd, "/rds_files/dataset5.rds", sep=""))
+}
 
 #===============================================================================
 

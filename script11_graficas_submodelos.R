@@ -68,7 +68,45 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
 #===============================================================================
 
 #===============================================================================
-# Modelo 1
+# Búsqueda de dos grupos de 3 días diferentes
+#-------------------------------------------------------------------------------
+
+# Primer grupo de 7 días: desde el 15 de septiembre se cogen los 3 días
+# siguientes de los que se tienen datos
+
+for (i in 1:nrow(dataframe_trabajo)){
+  if (as.numeric(format(dataframe_trabajo[i,"marca_tiempo"],"%d")) == 15 &
+      as.numeric(format(dataframe_trabajo[i,"marca_tiempo"],"%m")) == 09 &
+      as.numeric(format(dataframe_trabajo[i,"marca_tiempo"],"%H")) == 00 &
+      as.numeric(format(dataframe_trabajo[i,"marca_tiempo"],"%M")) == 00){
+    comienzo1<-i
+    final1<-comienzo1+24*3-1
+  }
+}
+
+# Primer grupo de 3 días: desde el 4 de noviembre se cogen los 3 días
+# siguientes de los que se tienen datos
+
+for (i in 1:nrow(dataframe_trabajo)){
+  if (as.numeric(format(dataframe_trabajo[i,"marca_tiempo"],"%d")) == 04 &
+      as.numeric(format(dataframe_trabajo[i,"marca_tiempo"],"%m")) == 11 &
+      as.numeric(format(dataframe_trabajo[i,"marca_tiempo"],"%H")) == 00 &
+      as.numeric(format(dataframe_trabajo[i,"marca_tiempo"],"%M")) == 00){
+    comienzo2<-i
+    final2<-comienzo2+24*3-1
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+# Limpieza de variables
+
+rm(i)
+
+#===============================================================================
+
+#===============================================================================
+# Submodelo del modelo 1
 #-------------------------------------------------------------------------------
 
 {
@@ -114,7 +152,20 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_s1.png",sep=""), width=800, 
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29))
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s1.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -126,12 +177,48 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s1_conf1.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s1_conf2.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo2:final2],
+        temperatura_interior_pred[comienzo2:final2], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_sup[comienzo2:final2], col="blue")
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
 }
 
 #===============================================================================
 
 #===============================================================================
-# Modelo 2
+# Submodelo del modelo 2
 #-------------------------------------------------------------------------------
 
 {
@@ -186,7 +273,7 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_s2.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s2.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -198,12 +285,48 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   dev.off() 
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s2_conf1.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s2_conf2.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo2:final2],
+        temperatura_interior_pred[comienzo2:final2], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_sup[comienzo2:final2], col="blue")
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
 }
 
 #===============================================================================
 
 #===============================================================================
-# Modelo 3
+# Submodelo del modelo 3
 #-------------------------------------------------------------------------------
 
 {
@@ -249,7 +372,7 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_s3.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s3.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -261,12 +384,48 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   dev.off() 
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s3_conf1.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s3_conf2.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo2:final2],
+        temperatura_interior_pred[comienzo2:final2], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_sup[comienzo2:final2], col="blue")
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
 }
 
 #===============================================================================
 
 #===============================================================================
-# Modelo 4
+# Submodelo del modelo 4
 #-------------------------------------------------------------------------------
 
 {
@@ -329,7 +488,7 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_s4.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s4.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -341,12 +500,48 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s4_conf1.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s4_conf2.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo2:final2],
+        temperatura_interior_pred[comienzo2:final2], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_sup[comienzo2:final2], col="blue")
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
 }
 
 #===============================================================================
 
 #===============================================================================
-# Modelo 5
+# Submodelo del modelo 5
 #-------------------------------------------------------------------------------
 
 {
@@ -392,7 +587,7 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_s5.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s5.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -404,12 +599,48 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s5_conf1.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s5_conf2.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo2:final2],
+        temperatura_interior_pred[comienzo2:final2], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_sup[comienzo2:final2], col="blue")
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
 }
 
 #===============================================================================
 
 #===============================================================================
-# Modelo 6
+# Submodelo del modelo 6
 #-------------------------------------------------------------------------------
 
 {
@@ -441,7 +672,7 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_s6.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s6.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -453,12 +684,48 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s6_conf1.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s6_conf2.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo2:final2],
+        temperatura_interior_pred[comienzo2:final2], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_sup[comienzo2:final2], col="blue")
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
 }
 
 #===============================================================================
 
 #===============================================================================
-# Modelo 7
+# Submodelo del modelo 7
 #-------------------------------------------------------------------------------
 
 {
@@ -504,7 +771,7 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_s7.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s7.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -516,12 +783,48 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   dev.off() 
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s7_conf1.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s7_conf2.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo2:final2],
+        temperatura_interior_pred[comienzo2:final2], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_sup[comienzo2:final2], col="blue")
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
 }
 
 #===============================================================================
 
 #===============================================================================
-# Modelo 8
+# Submodelo del modelo 8
 #-------------------------------------------------------------------------------
 
 {
@@ -584,7 +887,7 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_s8.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s8.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
@@ -592,6 +895,42 @@ rm(a, arx, dataframe_60, formula, i, j, nombre_dataframe, nombre_var)
         ylab="Temperatura interior predicha [ºC]",
         xlim=c(25,29), ylim=c(25,29),
         cex.lab=1.5, cex.axis=1.5)
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s8_conf1.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo1:final1],
+        temperatura_interior_pred[comienzo1:final1], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_sup[comienzo1:final1], col="blue")
+  points(temperatura_interior_med[comienzo1:final1],
+         intervalo_inf[comienzo1:final1], col="orange")
+  abline(a=0, b=1, col="red", lwd=4)
+  abline(a=-1, b=1, col="green", lwd=4)
+  abline(a=1, b=1, col="green", lwd=4)
+  dev.off()
+  
+  png(paste(getwd(),"/plots/5_ARX_def/temp_interior_med_vs_pred_s8_conf2.png",sep=""), 
+      width=800, height=800)
+  par(mar=c(5,5,3,5))
+  plot (temperatura_interior_med[comienzo2:final2],
+        temperatura_interior_pred[comienzo2:final2], 
+        xlab="Temperatura interior medida [ºC]", 
+        ylab="Temperatura interior predicha [ºC]",
+        xlim=c(25,29), ylim=c(25,29),
+        cex.lab=1.5, cex.axis=1.5)
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_sup[comienzo2:final2], col="blue")
+  points(temperatura_interior_med[comienzo2:final2],
+         intervalo_inf[comienzo1:final1], col="orange")
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)

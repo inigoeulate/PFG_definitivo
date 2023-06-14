@@ -123,32 +123,20 @@ regresion_output<-"temperatura_interior"
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
-        ylim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))))
+        xlim=c(25,29),
+        ylim=c(25,29))
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_0.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/4_ARX_ini/temp_interior_med_vs_pred_0.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
-        ylim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
+        xlim=c(25,29),
+        ylim=c(25,29),
         cex.lab=1.5, cex.axis=1.5)
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
@@ -173,7 +161,7 @@ regresion_output<-"temperatura_interior"
          lty=c(1,1),
          cex=0.5)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_con_marca_tiempo_0.png",
+  png(paste(getwd(),"/plots/4_ARX_ini/temp_interior_med_vs_pred_con_marca_tiempo_0.png",
             sep=""), width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_trabajo)],
@@ -278,32 +266,20 @@ regresion_output<-"temperatura_interior"
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
-        ylim=c(min(min(temperatura_interior_med-grados_margen),
-                  min(temperatura_interior_pred-grados_margen)),
-              max(max(temperatura_interior_med+grados_margen),
-                  max(temperatura_interior_pred+grados_margen))))
+        xlim=c(25,29),
+        ylim=c(25,29))
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_1.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/4_ARX_ini/temp_interior_med_vs_pred_1.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
-        ylim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
+        xlim=c(25,29),
+        ylim=c(25,29),
         cex.lab=1.5, cex.axis=1.5)
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
@@ -328,7 +304,7 @@ regresion_output<-"temperatura_interior"
          lty=c(1,1),
          cex=0.5)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_con_marca_tiempo_1.png",
+  png(paste(getwd(),"/plots/4_ARX_ini/temp_interior_med_vs_pred_con_marca_tiempo_1.png",
             sep=""), width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_trabajo)],
@@ -589,32 +565,20 @@ rm(a, arx, matriz_resultados, formula, i, j, k, minimo, nombre_var, quitar,
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
-        ylim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))))
+        xlim=c(25,29),
+        ylim=c(25,29))
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_2.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/4_ARX_ini/temp_interior_med_vs_pred_2.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
-        ylim=c(min(min(temperatura_interior_med-grados_margen),
-                   min(temperatura_interior_pred-grados_margen)),
-               max(max(temperatura_interior_med+grados_margen),
-                   max(temperatura_interior_pred+grados_margen))),
+        xlim=c(25,29),
+        ylim=c(25,29),
         cex.lab=1.5, cex.axis=1.5)
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
@@ -636,7 +600,7 @@ rm(a, arx, matriz_resultados, formula, i, j, k, minimo, nombre_var, quitar,
          lty=c(1,1),
          cex=0.5)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_con_marca_tiempo_2.png",
+  png(paste(getwd(),"/plots/4_ARX_ini/temp_interior_med_vs_pred_con_marca_tiempo_2.png",
             sep=""), width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataframe_trabajo$hora_solar[pasos_tiempo_pasados+1:nrow(dataframe_trabajo)],
@@ -892,24 +856,20 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k, x,
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(temperatura_interior_med-grados_margen),
-               max(temperatura_interior_med+grados_margen)),
-        ylim=c(min(temperatura_interior_pred-grados_margen),
-               max(temperatura_interior_pred+grados_margen)))
+        xlim=c(25,29),
+        ylim=c(25,29))
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
   abline(a=1, b=1, col="green", lwd=4)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_3.png",sep=""), width=800, 
+  png(paste(getwd(),"/plots/4_ARX_ini/temp_interior_med_vs_pred_3.png",sep=""), width=800, 
       height=800)
   par(mar=c(5,5,3,5))
   plot (temperatura_interior_med, temperatura_interior_pred, 
         xlab="Temperatura interior medida [ºC]", 
         ylab="Temperatura interior predicha [ºC]",
-        xlim=c(min(temperatura_interior_med-grados_margen),
-               max(temperatura_interior_med+grados_margen)),
-        ylim=c(min(temperatura_interior_pred-grados_margen),
-               max(temperatura_interior_pred+grados_margen)),
+        xlim=c(25,29),
+        ylim=c(25,29),
         cex.lab=1.5, cex.axis=1.5)
   abline(a=0, b=1, col="red", lwd=4)
   abline(a=-1, b=1, col="green", lwd=4)
@@ -932,7 +892,7 @@ rm(a, arx, dataframe_resultados, dejadas, exit, final, formula, i, j, k, x,
          lty=c(1,1),
          cex=0.5)
   
-  png(paste(getwd(),"/plots/temp_interior_med_vs_pred_con_marca_tiempo_3.png",
+  png(paste(getwd(),"/plots/4_ARX_ini/temp_interior_med_vs_pred_con_marca_tiempo_3.png",
             sep=""), width=800, height=800)
   par(mar=c(5,5,3,5))
   plot(dataframe_trabajo$hora_solar[x:nrow(dataframe_trabajo)],

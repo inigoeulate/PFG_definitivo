@@ -1692,10 +1692,11 @@ rm(a, arx, dataframe_resultados, formula, dejadas, exit, final, i, j, k,
 
 #===============================================================================
 
-
+#===============================================================================
 # Limpieza de variables
+#-------------------------------------------------------------------------------
 
-rm(dataframe_trabajo, grados_margen, nombres_filas, numero_filas,
-   obs_anteriores, regresion_output, sampleo, variables_regresion_input,
-   wd, prob, z)
+rm(grados_margen, nombres_filas, numero_filas, obs_anteriores, regresion_output,
+   sampleo, variables_regresion_input, prob, z)
 
+#===============================================================================
