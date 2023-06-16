@@ -9,7 +9,7 @@
 
 #===============================================================================
 #===============================================================================
-# En este décimo script se llevarán a cabo los 8 modelos ARX definitivos.
+# En este décimo script se llevarán a cabo los 8 modelos ARX diseñados.
 #===============================================================================
 # Tras el análisis de los 3 ARX iniciales se llega a la conclusión de que se van
 # a emplear 8 modelos (2x2x2)
